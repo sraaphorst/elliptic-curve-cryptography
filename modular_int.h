@@ -32,17 +32,24 @@ namespace ecc {
         ModularInt &operator/=(const ModularInt&);
 
         ModularInt &operator++();
-        ModularInt &operator++(int);
+        ModularInt operator++(int);
 
         ModularInt &operator--();
-        ModularInt &operator--(int);
+        ModularInt operator--(int);
 
+        // Note that this defines a PARTIAL ordering and not a total ordering.
         [[nodiscard]] bool operator==(const ModularInt&) const;
-        [[nodiscard]] bool operator!=(const ModularInt&) const;
         [[nodiscard]] bool operator<(const ModularInt&) const;
-        [[nodiscard]] bool operator<=(const ModularInt&) const;
-        [[nodiscard]] bool operator>(const ModularInt&) const;
-        [[nodiscard]] bool operator>=(const ModularInt&) const;
+
+        [[nodiscard]] inline const BigInt &get_value() const {
+            return value;
+        }
+
+        [[nodiscard]] inline const BigInt &get_mod() const {
+            return mod;
+        }
+
+        [[nodiscard]] std::string to_string() const;
 
     private:
         BigInt value;
@@ -50,14 +57,13 @@ namespace ecc {
 
         using bigint_func1 = std::function<BigInt(const BigInt&)>;
         using bigint_func2 = std::function<BigInt(const BigInt&, const BigInt&)>;
+        using compare_bigint = std::function<bool(const BigInt&, const BigInt&)>;
 
         // Check to see if the mod values are the same: if not, throw a domain_exception.
         void check_same_mod(const ModularInt&) const;
 
         [[nodiscard]] ModularInt op(const bigint_func1&) const;
         [[nodiscard]] ModularInt op(const bigint_func2&, const ModularInt&) const;
-        [[nodiscard]] ModularInt &op_set(const bigint_func2&, const BigInt&);
+        [[nodiscard]] ModularInt &op_set(const bigint_func2&, const ModularInt&);
     };
 }
-
-std::ostream &operator<<(std::ostream&, const ecc::ModularInt&);

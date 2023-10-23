@@ -6,9 +6,11 @@
 #include <iostream>
 #include "big_int.h"
 #include "printable.h"
+#include "operations.h"
 
 using namespace ecc;
 using namespace ecc::printable;
+using namespace ecc::operations;
 
 int main() {
     BigInt a(255);
@@ -16,4 +18,6 @@ int main() {
     BigInt c("4382957847829743892748927432");
     BigInt d = (-a * b) % c + 3;
     std::cout << '(' << -a << " * " << b << ") % " << c << " + 3 = " << d << '\n';
+
+    std::cout << b << " >= " << c << ": " << (b >= c) << '\n';
 }

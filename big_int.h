@@ -12,10 +12,6 @@
 #include <gmp.h>
 
 namespace ecc {
-    class ModularInt;
-}
-
-namespace ecc {
     class BigInt {
     public:
         BigInt();
@@ -60,7 +56,7 @@ namespace ecc {
 
         [[nodiscard]] std::string to_string() const;
 
-        [[nodiscard]] explicit operator mpz_t&();
+        [[nodiscard]] explicit operator const mpz_t&() const;
 
     private:
         mpz_t value;

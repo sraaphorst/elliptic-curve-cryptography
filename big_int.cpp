@@ -158,7 +158,7 @@ namespace ecc {
         return str;
     }
 
-    BigInt::operator mpz_t& () {
+    BigInt::operator const mpz_t& () const {
         return value;
     }
 

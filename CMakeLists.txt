@@ -11,9 +11,9 @@ if(NOT GMP_LIBRARY)
     message(FATAL_ERROR "GMP not found.")
 endif()
 
-add_library(BigInt OBJECT big_int.cpp)
-target_include_directories(BigInt PRIVATE ${GMP_INCLUDE_DIR})
+add_library(ModularInt OBJECT big_int.cpp modular_int.cpp)
+target_include_directories(ModularInt PRIVATE ${GMP_INCLUDE_DIR})
 
 add_executable(elliptic_curve_cryptography main.cpp)
 target_include_directories(elliptic_curve_cryptography PRIVATE ${GMP_INCLUDE_DIR})
-target_link_libraries(elliptic_curve_cryptography ${GMP_LIBRARY} BigInt)
+target_link_libraries(elliptic_curve_cryptography ${GMP_LIBRARY} ModularInt)
