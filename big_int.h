@@ -45,12 +45,9 @@ namespace ecc {
         BigInt& operator--();
         BigInt operator--(int);
 
+        // These define a total ordering on BigInt.
         [[nodiscard]] bool operator==(const BigInt&) const noexcept;
-        [[nodiscard]] bool operator!=(const BigInt&) const noexcept;
         [[nodiscard]] bool operator<(const BigInt&) const noexcept;
-        [[nodiscard]] bool operator<=(const BigInt&) const noexcept;
-        [[nodiscard]] bool operator>(const BigInt&) const noexcept;
-        [[nodiscard]] bool operator>=(const BigInt&) const noexcept;
 
         [[nodiscard]] bool zero() const noexcept;
 

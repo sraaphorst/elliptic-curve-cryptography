@@ -127,24 +127,8 @@ namespace ecc {
         return mpz_cmp(value, other.value) == 0;
     }
 
-    bool BigInt::operator!=(const BigInt &other) const noexcept {
-        return !(*this == other);
-    }
-
     bool BigInt::operator<(const BigInt &other) const noexcept {
         return mpz_cmp(value, other.value) < 0;
-    }
-
-    bool BigInt::operator<=(const BigInt &other) const noexcept {
-        return mpz_cmp(value, other.value) <= 0;
-    }
-
-    bool BigInt::operator>(const BigInt &other) const noexcept {
-        return mpz_cmp(value, other.value) > 0;
-    }
-
-    bool BigInt::operator>=(const BigInt &other) const noexcept {
-        return mpz_cmp(value, other.value) >= 0;
     }
 
     bool BigInt::zero() const noexcept {
