@@ -12,6 +12,10 @@
 #include <gmp.h>
 
 namespace ecc {
+    class ModularInt;
+}
+
+namespace ecc {
     class BigInt {
     public:
         BigInt();
@@ -23,15 +27,15 @@ namespace ecc {
 
         ~BigInt();
 
-        [[nodiscard]] BigInt operator+(const BigInt&) const;
+        BigInt &operator=(const BigInt&);
+        BigInt &operator=(BigInt&&) noexcept;
+
         [[nodiscard]] BigInt operator-() const;
+        [[nodiscard]] BigInt operator+(const BigInt&) const;
         [[nodiscard]] BigInt operator-(const BigInt&) const;
         [[nodiscard]] BigInt operator*(const BigInt&) const;
         [[nodiscard]] BigInt operator/(const BigInt&) const;
         [[nodiscard]] BigInt operator%(const BigInt&) const;
-
-        BigInt &operator=(const BigInt&);
-        BigInt &operator=(BigInt&&) noexcept;
 
         BigInt &operator+=(const BigInt&);
         BigInt &operator-=(const BigInt&);
@@ -52,8 +56,11 @@ namespace ecc {
         [[nodiscard]] bool operator>(const BigInt&) const noexcept;
         [[nodiscard]] bool operator>=(const BigInt&) const noexcept;
 
+        [[nodiscard]] bool zero() const noexcept;
+
+        [[nodiscard]] std::string to_string() const;
+
         [[nodiscard]] explicit operator mpz_t&();
-        [[nodiscard]] explicit operator std::string() const;
 
     private:
         mpz_t value;
@@ -61,9 +68,11 @@ namespace ecc {
         using gmp_func1 = std::function<void(mpz_ptr, mpz_srcptr)>;
         using gmp_func2 = std::function<void(mpz_ptr, mpz_srcptr, mpz_srcptr)>;
 
+        // Raises a domain_error if this is zero for div and mod operations.
+        void check(const std::string&) const;
+
         [[nodiscard]] BigInt op(const gmp_func1&) const;
         [[nodiscard]] BigInt op(const gmp_func2&, const BigInt&) const;
+        [[nodiscard]] BigInt &op_set(const gmp_func2&, const BigInt&);
     };
 }
-
-std::ostream &operator<<(std::ostream&, const ecc::BigInt&);

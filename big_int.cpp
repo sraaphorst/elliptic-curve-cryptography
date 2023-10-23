@@ -3,9 +3,15 @@
  * By Sebastian Raaphorst, 2023.
  */
 
+#include <stdexcept>
+#include <string>
+
 #include "big_int.h"
 
 namespace ecc {
+    static const std::string div_error{"Division by zero."};
+    static const std::string mod_error{"Modulus by zero."};
+
     BigInt::BigInt() {
         mpz_init(value);
     }
@@ -35,40 +41,6 @@ namespace ecc {
         mpz_clear(value);
     }
 
-    BigInt BigInt::operator+(const BigInt &other) const {
-        return op(mpz_add, other);
-    }
-
-    BigInt BigInt::operator-() const {
-        BigInt result;
-        mpz_neg(result.value, value);
-        return result;
-    }
-
-    BigInt BigInt::operator-(const BigInt &other) const {
-        BigInt result;
-        mpz_sub(result.value, value, other.value);
-        return result;
-    }
-
-    BigInt BigInt::operator*(const BigInt &other) const {
-        BigInt result;
-        mpz_mul(result.value, value, other.value);
-        return result;
-    }
-
-    BigInt BigInt::operator/(const BigInt &other) const {
-        BigInt result;
-        mpz_div(result.value, value, other.value);
-        return result;
-    }
-
-    BigInt BigInt::operator%(const BigInt &other) const {
-        BigInt result;
-        mpz_mod(result.value, value, other.value);
-        return result;
-    }
-
     BigInt &BigInt::operator=(const BigInt &other) {
         if (this != &other)
             mpz_set(this->value, other.value);
@@ -81,29 +53,52 @@ namespace ecc {
         return *this;
     }
 
+    BigInt BigInt::operator-() const {
+        return op(mpz_neg);
+    }
+
+    BigInt BigInt::operator+(const BigInt &other) const {
+        return op(mpz_add, other);
+    }
+
+    BigInt BigInt::operator-(const BigInt &other) const {
+        return op(mpz_sub, other);
+    }
+
+    BigInt BigInt::operator*(const BigInt &other) const {
+        return op(mpz_mul, other);
+    }
+
+    BigInt BigInt::operator/(const BigInt &other) const {
+        other.check(div_error);
+        return op(mpz_div, other);
+    }
+
+    BigInt BigInt::operator%(const BigInt &other) const {
+        other.check(mod_error);
+        return op(mpz_mod, other);
+    }
+
     BigInt &BigInt::operator+=(const BigInt &other) {
-        mpz_add(value, value, other.value);
-        return *this;
+        return op_set(mpz_add, other);
     }
 
     BigInt &BigInt::operator-=(const BigInt &other) {
-        mpz_sub(value, value, other.value);
-        return *this;
+        return op_set(mpz_sub, other);
     }
 
     BigInt &BigInt::operator*=(const BigInt &other) {
-        mpz_mul(value, value, other.value);
-        return *this;
+        return op_set(mpz_mul, other);
     }
 
     BigInt &BigInt::operator/=(const BigInt &other) {
-        mpz_div(value, value, other.value);
-        return *this;
+        other.check(div_error);
+        return op_set(mpz_div, other);
     }
 
     BigInt &BigInt::operator%=(const BigInt &other) {
-        mpz_mod(value, value, other.value);
-        return *this;
+        other.check(mod_error);
+        return op_set(mpz_mod, other);
     }
 
     BigInt &BigInt::operator++() {
@@ -152,25 +147,41 @@ namespace ecc {
         return mpz_cmp(value, other.value) >= 0;
     }
 
-    BigInt::operator mpz_t& () {
-        return value;
+    bool BigInt::zero() const noexcept {
+        return mpz_cmp_si(this->value, 0) == 0;
     }
 
-    BigInt::operator std::string() const {
+    std::string BigInt::to_string() const {
         const auto char_array = mpz_get_str(nullptr, 10, value);
         std::string str{char_array};
         free(char_array);
         return str;
     }
 
-    BigInt BigInt::op(const gmp_func &f, const BigInt &other) const {
+    BigInt::operator mpz_t& () {
+        return value;
+    }
+
+    void BigInt::check(const std::string &err_msg) const {
+        if (zero())
+            throw std::domain_error(err_msg);
+    }
+
+    BigInt BigInt::op(const gmp_func1 &f) const {
+        BigInt result;
+        f(result.value, this->value);
+        return result;
+    }
+
+    BigInt BigInt::op(const gmp_func2 &f, const BigInt &other) const {
         BigInt result;
         f(result.value, this->value, other.value);
         return result;
     }
+
+    BigInt &BigInt::op_set(const gmp_func2 &f, const BigInt &other) {
+        f(value, value, other.value);
+        return *this;
+    }
 }
 
-std::ostream &operator<<(std::ostream &out, const ecc::BigInt &big_int) {
-    const std::string s = static_cast<std::string>(big_int);
-    return out << s;
-}
