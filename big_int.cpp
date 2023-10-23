@@ -3,6 +3,7 @@
  * By Sebastian Raaphorst, 2023.
  */
 
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -135,7 +136,39 @@ namespace ecc {
         return mpz_cmp_si(this->value, 0) == 0;
     }
 
-    std::string BigInt::to_string() const {
+    BigInt BigInt::gcd(const BigInt &other) const noexcept {
+        mpz_t a, b, g;
+
+        mpz_inits(a, b, g, nullptr);
+        mpz_set(a, this->value);
+        mpz_set(b, other.value);
+
+        mpz_gcd(g, a, b);
+
+        mpz_clears(b, a, nullptr);
+        return BigInt{g};
+    }
+
+    BigInt BigInt::extended_gcd(const BigInt &other, BigInt &x, BigInt &y) const noexcept {
+        mpz_t a, b, g;
+
+        mpz_inits(a, b, g, nullptr);
+        mpz_set(a, this->value);
+        mpz_set(b, other.value);
+
+        mpz_gcdext(g, x.value, y.value, a, b);
+
+        mpz_clears(b, a, nullptr);
+        return BigInt{g};
+    }
+
+    bool BigInt::is_probably_prime(int tries) const {
+        if (tries <= 0)
+            throw std::domain_error(std::format("Prime tries must be a positive integer: {}", tries));
+        return mpz_probab_prime_p(value, tries);
+    }
+
+    std::string BigInt::to_string() const noexcept {
         const auto char_array = mpz_get_str(nullptr, 10, value);
         std::string str{char_array};
         free(char_array);

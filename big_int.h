@@ -12,7 +12,10 @@
 #include <gmp.h>
 
 namespace ecc {
+    class ModularInt;
+
     class BigInt {
+        friend ModularInt;
     public:
         BigInt();
         BigInt(long);
@@ -51,7 +54,19 @@ namespace ecc {
 
         [[nodiscard]] bool zero() const noexcept;
 
-        [[nodiscard]] std::string to_string() const;
+        // Find the GCD of this and the other number.
+        [[nodiscard]] BigInt gcd(const BigInt&) const noexcept;
+
+        // Find the GCD of this and the other number, and the coefficients that produce it.
+        [[nodiscard]] BigInt extended_gcd(const BigInt&, BigInt&, BigInt&) const noexcept;
+
+        // Determine if this number is (probably) prime.
+        // Probable primality is checked the number of specified tries.
+        // If the number of tries is not a positive integer, std::bad_domain is thrown.
+        // If the function returns false, the number is guaranteed to be composite.
+        [[nodiscard]] bool is_probably_prime(int tries = 1) const;
+
+        [[nodiscard]] std::string to_string() const noexcept;
 
         [[nodiscard]] explicit operator const mpz_t&() const;
 

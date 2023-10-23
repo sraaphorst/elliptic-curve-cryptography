@@ -6,6 +6,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <ostream>
 
 #include "big_int.h"
@@ -49,7 +50,11 @@ namespace ecc {
             return mod;
         }
 
-        [[nodiscard]] std::string to_string() const;
+        [[nodiscard]] std::string to_string() const noexcept;
+
+        // Find the multiplicative inverse of this element if it exists, which
+        // is the case iff gcd(value, mod) == 1.
+        [[nodiscard]] std::optional<ModularInt> invert() const;
 
     private:
         BigInt value;

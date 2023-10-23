@@ -6,7 +6,11 @@
 #include "modular_int.h"
 
 #include <format>
+#include <optional>
 #include <stdexcept>
+
+#include <gmp.h>
+
 #include "operations.h"
 
 namespace ecc {
@@ -92,8 +96,21 @@ namespace ecc {
         return value < other.value;
     }
 
-    std::string ModularInt::to_string() const {
+    std::string ModularInt::to_string() const noexcept {
         return std::format("{}({})", value.to_string(), mod.to_string());
+    }
+
+    std::optional<ModularInt> ModularInt::invert() const {
+        // We use GMP functions here for efficiency.
+        mpz_t result;
+        mpz_init(result);
+        const auto success = mpz_invert(result, value.value, mod.value);
+
+        if (success)
+            return ModularInt{BigInt{result}, mod};
+
+        mpz_clear(result);
+        return std::nullopt;
     }
 
     void ModularInt::check_same_mod(const ModularInt &other) const {
@@ -103,12 +120,12 @@ namespace ecc {
     }
 
     ModularInt ModularInt::op(const bigint_func1 &f) const {
-        return ModularInt(f(value), mod);
+        return ModularInt{f(value), mod};
     }
 
     ModularInt ModularInt::op(const bigint_func2 &f, const ModularInt &other) const {
         check_same_mod(other);
-        return ModularInt(f(this->value, other.value), mod);
+        return ModularInt{f(this->value, other.value), mod};
     }
 
     ModularInt &ModularInt::op_set(const bigint_func2 &f, const ModularInt &other) {
