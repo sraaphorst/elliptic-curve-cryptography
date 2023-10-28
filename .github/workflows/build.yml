@@ -40,3 +40,6 @@ jobs:
       - name: Build project
         run: |
           cmake --build build
+
+      - name: Preserve build artifact
+        run: cp -r $GITHUB_WORKSPACE/build $GITHUB_WORKSPACE/build_artifact
