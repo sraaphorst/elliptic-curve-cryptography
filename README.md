@@ -1,7 +1,6 @@
 # Elliptic Curve Cryptography
 
-[![Build Status](https://github.com/sraaphorst/elliptic-curve-cryptography/workflows/Build/badge.svg)](https://github.com/sraaphorst/elliptic-curve-cryptography/actions)
-[![Test Status](https://github.com/sraaphorst/elliptic-curve-cryptography/workflows/Test/badge.svg)](https://github.com/sraaphorst/elliptic-curve-cryptography/actions)
+[![Project Status](https://github.com/sraaphorst/elliptic-curve-cryptography/workflows/BuildAndTest/badge.svg)](https://github.com/sraaphorst/elliptic-curve-cryptography/actions)
 
 
 <!--
