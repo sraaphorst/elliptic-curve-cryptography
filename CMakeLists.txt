@@ -11,4 +11,5 @@ if(NOT GMP_LIBRARY)
     message(FATAL_ERROR "GMP not found.")
 endif()
 
+enable_testing()
 add_subdirectory(src)

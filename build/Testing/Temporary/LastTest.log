@@ -1,0 +1,22 @@
+Start testing: Oct 28 01:19 HST
+----------------------------------------------------------
+1/1 Testing: TestBigInt
+1/1 Test: TestBigInt
+Command: "/Users/vorpal/dev/C++/elliptic-curve-cryptography/build/src/tests/test_big_int"
+Directory: /Users/vorpal/dev/C++/elliptic-curve-cryptography/build/src/tests
+"TestBigInt" start time: Oct 28 01:19 HST
+Output:
+----------------------------------------------------------
+Using configuration: seed=10921523928833006547
+
+- test extended gcd
+OK, passed 100 tests
+<end of output>
+Test time =   0.51 sec
+----------------------------------------------------------
+Test Passed.
+"TestBigInt" end time: Oct 28 01:19 HST
+"TestBigInt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 28 01:19 HST
