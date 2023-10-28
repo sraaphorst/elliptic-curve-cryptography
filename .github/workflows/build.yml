@@ -39,6 +39,3 @@ jobs:
       - name: Build project
         run: |
           cmake --build build
-          echo ${{ github.workspace }}
-          echo $GITHUB_WORKSPACE
-          echo "$GITHUB_WORKSPACE" >> $GITHUB_ENV
