@@ -40,8 +40,3 @@ jobs:
       - name: Build project
         run: |
           cmake --build build
-          echo $GITHUB_WORKSPACE
-          echo ${{ github.workspace }}
-
-      - name: Save build artifacts
-        run: mv $GITHUB_WORKSPACE/build $GITHUB_WORKSPACE/build-artifacts
