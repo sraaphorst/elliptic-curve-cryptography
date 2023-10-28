@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +22,7 @@ jobs:
           sudo apt-get install ninja-build
 
       - name: Set up CMake
-        uses: crazy-max/setup-cmake@v1
-        with:
-          cmake-version: 3.26
+        uses: lukka/get-cmake@latest
 
       - name: Configure CMake with Ninja
         run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=20
