@@ -41,5 +41,8 @@ jobs:
         run: |
           cmake --build build
 
-      - name: Preserve build artifact
-        run: cp -r $GITHUB_WORKSPACE/build $GITHUB_WORKSPACE/build_artifact
+      - name: Debug workspace
+        run: |
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "Contents of the workspace:"
+          ls -al $GITHUB_WORKSPACE
