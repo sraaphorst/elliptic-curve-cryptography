@@ -22,8 +22,9 @@ jobs:
           sudo apt-get install ninja-build
           ninja --version
 
-#      - name: Set up CMake
-#        uses: lukka/get-cmake@latest
+      - name: Update Submodules
+        run: git submodule update --init --recursive
+
       - name: Set up CMake
         run: |
           sudo apt-get install cmake
