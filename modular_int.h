@@ -14,6 +14,13 @@
 namespace ecc {
     class ModularInt {
     public:
+        enum class Legendre {
+            DIVIDES = 0,
+            NOT_RESIDUE = -1,
+            RESIDUE = 1,
+        };
+        static int legendre_value(Legendre) noexcept;
+
         ModularInt(BigInt value, BigInt mod);
         ModularInt(const ModularInt&) = default;
         ModularInt(ModularInt&&) noexcept = default;
@@ -52,6 +59,12 @@ namespace ecc {
 
         [[nodiscard]] std::string to_string() const noexcept;
 
+        // Find the Legendre value of (value/mod), which is:
+        // 0 if mod | value
+        // 1 if value is a residue class, i.e. there exists b such that b^2 ≡ value (mod)
+        // -1 otherwise.
+        [[nodiscard]] Legendre legendre() const;
+
         // Find the multiplicative inverse of this element if it exists, which
         // is the case iff gcd(value, mod) == 1.
         [[nodiscard]] std::optional<ModularInt> invert() const;
@@ -62,7 +75,6 @@ namespace ecc {
 
         using bigint_func1 = std::function<BigInt(const BigInt&)>;
         using bigint_func2 = std::function<BigInt(const BigInt&, const BigInt&)>;
-        using compare_bigint = std::function<bool(const BigInt&, const BigInt&)>;
 
         // Check to see if the mod values are the same: if not, throw a domain_exception.
         void check_same_mod(const ModularInt&) const;

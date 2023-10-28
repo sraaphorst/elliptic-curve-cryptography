@@ -15,10 +15,13 @@
 
 namespace ecc {
     using namespace operations;
-
     // The representation of a ModularInt.
     static std::string modular_int_string(const BigInt &value, const BigInt &mod) {
         return std::format("{}({})", value.to_string(), mod.to_string());
+    }
+
+    int ModularInt::legendre_value(Legendre legendre) noexcept {
+        return static_cast<int>(legendre);
     }
 
     // Make sure we reduce in case value >= mod.
@@ -98,6 +101,15 @@ namespace ecc {
 
     std::string ModularInt::to_string() const noexcept {
         return std::format("{}({})", value.to_string(), mod.to_string());
+    }
+
+    ModularInt::Legendre ModularInt::legendre() const {
+        // We use GMP functions here for efficiency.
+        switch (mpz_legendre(value.value, mod.value)) {
+            case 0: return Legendre::DIVIDES;
+            case -1: return Legendre::NOT_RESIDUE;
+            default: return Legendre::RESIDUE;
+        }
     }
 
     std::optional<ModularInt> ModularInt::invert() const {
