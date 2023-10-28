@@ -24,10 +24,8 @@ jobs:
 #      - name: Set up CMake
 #        uses: lukka/get-cmake@latest
       - name: Set up CMake
-        uses: actions/setup-cmake@v2
-        with:
-          cmake-version: 3.21
-
+        run: |
+          sudo apt-get install cmake
 
       - name: Configure CMake with Ninja
         run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=20
