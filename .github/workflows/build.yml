@@ -32,8 +32,8 @@ jobs:
 
       - name: Configure CMake with Clang
         run: |
-          sudo apt-get install clang-12
-          export CXX=clang++-12
+          sudo apt-get install clang-15
+          export CXX=clang++-15
           cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=20
 
       - name: Build project
