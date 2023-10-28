@@ -37,4 +37,8 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=20
 
       - name: Build project
-        run: cmake --build build
+        run: |
+          cmake --build build
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+          echo "$GITHUB_WORKSPACE" >> $GITHUB_ENV
