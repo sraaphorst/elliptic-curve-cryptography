@@ -11,11 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug workspace
+        run: |
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "Contents of the workspace:"
+          ls -al $GITHUB_WORKSPACE
+
       - name: Run ctest
         run: |
-          echo $GITHUB_WORKSPACE
-          ls -al $GITHUB_WORKSPACE
-          ls -al $GITHUB_WORKSPACE/build_artifact
-          mv $GITHUB_WORKSPACE/build_artifact $GITHUB_WORKSPACE/build
           cd $GITHUB_WORKSPACE/build
           ctest
