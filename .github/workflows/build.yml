@@ -1,4 +1,4 @@
-name: Build
+name: BuildAndTest
 
 on:
   push:
@@ -41,8 +41,7 @@ jobs:
         run: |
           cmake --build build
 
-      - name: Debug workspace
+      - name: Run ctest
         run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          echo "Contents of the workspace:"
-          ls -al $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/build
+          ctest
