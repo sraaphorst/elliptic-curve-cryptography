@@ -100,6 +100,15 @@ namespace ecc {
         return std::format("{}({})", value.to_string(), mod.to_string());
     }
 
+    ModularInt::Legendre ModularInt::legendre() const {
+        // We use GMP functions here for efficiency.
+        switch (mpz_legendre(value.value, mod.value)) {
+            case 0: return Legendre::DIVIDES;
+            case -1: return Legendre::NOT_RESIDUE;
+            default: return Legendre::RESIDUE;
+        }
+    }
+
     std::optional<ModularInt> ModularInt::invert() const {
         // We use GMP functions here for efficiency.
         mpz_t result;
