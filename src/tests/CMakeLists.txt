@@ -1,6 +1,4 @@
-enable_testing()
-
-add_subdirectory(rapidcheck)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/rapidcheck)
 
 include_directories(rapidcheck)
 include_directories(../ecc)
