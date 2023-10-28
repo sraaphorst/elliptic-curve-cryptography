@@ -20,12 +20,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build
+          ninja --version
 
 #      - name: Set up CMake
 #        uses: lukka/get-cmake@latest
       - name: Set up CMake
         run: |
           sudo apt-get install cmake
+          cmake --version
 
       - name: Configure CMake with Ninja
         run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=20
