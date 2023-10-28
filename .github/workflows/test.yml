@@ -11,14 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Output variables
-        run: |
-          echo $GITHUB_WORKSPACE
-          echo ${{ github.workspace }}
-
-      - name: Restore build artifacts
-        run: mv $GITHUB_WORKSPACE/build-artifacts $GITHUB_WORKSPACE/build
-
       - name: Run ctest
         run: |
           cd $GITHUB_WORKSPACE/build
