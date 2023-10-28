@@ -4,10 +4,10 @@
  */
 
 #include <iostream>
-#include "big_int.h"
-#include "modular_int.h"
-#include "operations.h"
-#include "printable.h"
+#include "ecc/big_int.h"
+#include "ecc/modular_int.h"
+#include "ecc/operations.h"
+#include "ecc/printable.h"
 
 using namespace ecc;
 using namespace ecc::printable;
