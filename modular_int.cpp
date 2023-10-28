@@ -15,10 +15,13 @@
 
 namespace ecc {
     using namespace operations;
-
     // The representation of a ModularInt.
     static std::string modular_int_string(const BigInt &value, const BigInt &mod) {
         return std::format("{}({})", value.to_string(), mod.to_string());
+    }
+
+    int ModularInt::legendre_value(Legendre legendre) noexcept {
+        return static_cast<int>(legendre);
     }
 
     // Make sure we reduce in case value >= mod.

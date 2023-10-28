@@ -19,6 +19,7 @@ namespace ecc {
             NOT_RESIDUE = -1,
             RESIDUE = 1,
         };
+        static int legendre_value(Legendre) noexcept;
 
         ModularInt(BigInt value, BigInt mod);
         ModularInt(const ModularInt&) = default;
