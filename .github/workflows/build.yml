@@ -33,9 +33,15 @@ jobs:
       - name: Configure CMake with Clang
         run: |
           sudo apt-get install clang-15
+          export CC=clang-15
           export CXX=clang++-15
           cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=20
 
       - name: Build project
         run: |
           cmake --build build
+          echo $GITHUB_WORKSPACE
+          echo ${{ github.workspace }}
+
+      - name: Save build artifacts
+        run: mv $GITHUB_WORKSPACE/build $GITHUB_WORKSPACE/build-artifacts

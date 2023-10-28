@@ -11,10 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+
+      - name: Output variables
+        run: |
+          echo $GITHUB_WORKSPACE
+          echo ${{ github.workspace }}
+
+      - name: Restore build artifacts
+        run: mv $GITHUB_WORKSPACE/build-artifacts $GITHUB_WORKSPACE/build
 
       - name: Run ctest
         run: |
-          cd build
+          cd $GITHUB_WORKSPACE/build
           ctest
