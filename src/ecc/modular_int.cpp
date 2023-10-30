@@ -143,8 +143,11 @@ namespace ecc {
     }
 
     std::optional<ModularInt> ModularInt::sqrt() const {
+        // To follow algorithm, set a to this.
+        const auto &a = *this;
+
         // If a non-residue class, exit immediately.
-        if (legendre() != Legendre::RESIDUE)
+        if (a.legendre() != Legendre::RESIDUE)
             return std::nullopt;
 
         // Test the last two bits of the modulus.
@@ -163,21 +166,35 @@ namespace ecc {
         // Find number of binary zeros on the right of the number until first 1 is found and eliminate them.
         auto q = mod - 1;
         const auto e = mpz_scan1(q.value, 0);
-        mpz_tdiv_q_2exp(q.value, q.value, e);
+//        mpz_tdiv_q_2exp(q.value, q.value, e);
+
+        auto i = e;
+        while (i) {
+            mpz_divexact_ui(q.value, q.value, 2);
+            --i;
+        }
 
         // Find a generator.
         // Randomly search for non-residue.
-        ModularInt generator{1, mod};
+        ModularInt n{1, mod};
         gmp::gmp_rng rng;
-        while (generator.legendre() != Legendre::NOT_RESIDUE)
-            generator = ModularInt{rng.random_mod(mod.value), mod};
+        while (n.legendre() != Legendre::NOT_RESIDUE)
+            n = ModularInt{rng.random_mod(mod.value), mod};
 
         // Initialize working components.
-        auto y = generator.pow(q);
+        // y = n^q
+        auto y = n.pow(q);
         auto r = e;
-        auto x = pow((q - 1) / 2);
-        auto b = x * x * *this;
-        x *= *this;
+
+        // x = a^{{q-1}/2}
+        // q-1 should be exactly divisible by 2 now.
+        auto x = a.pow((q - 1) / 2);
+
+        // b = ax^2
+        auto b = a * x * x;
+
+        // x = ax
+        x = a * x;
 
         while (b.value != 1) {
             auto t1 = b;
@@ -185,8 +202,11 @@ namespace ecc {
             // Continue until we either reach r or t1 becomes 1, in which case, any further exponentiation
             // does not change its value.
             auto m = 1;
-            while (m < r && t1.value != 1) {
+            while (m < r) {
                 t1 = t1.pow(2);
+//                t1 *= t1;
+                if (t1.value == 1)
+                    break;
                 ++m;
             }
 
@@ -196,12 +216,23 @@ namespace ecc {
 
             // Calculate y^{2^{r - m - 1}}.
             auto t = y;
-            for (auto i = r - m - 1; i > 0; --i)
-                t = t.pow(2);
 
+            i = r - m - 1;
+            while (i) {
+                t = t.pow(2);
+                --i;
+            }
+//            for (i = r - m - 1; i > 0; --i)
+//                t *= t;
+
+            // y = t^2
             y = t * t;
             r = m;
+
+            // x = xt
             x = x * t;
+
+            // b = by
             b = b * y;
         }
 
