@@ -74,4 +74,20 @@ int main() {
         std::cout << comp << " is (probably) prime.\n";
     else
         std::cout << comp << " is not prime.\n";
+
+    std::cout << "\n\nLEGENDRE:\n";
+    for (long i=0; i < 3; ++i) {
+        ModularInt legtest{i, 3};
+        std::cout << legtest << ": " << ModularInt::legendre_value(legtest.legendre()) << '\n';
+    }
+
+//    for (int i=2; i < 12161; ++i) {
+//        const auto m = ModularInt{i, 12161};
+//        m.sqrt();
+//        std::cout << i << '\n';
+//    }
+
+    const auto m = ModularInt{56, 129};
+    const auto result = m.pow(4);
+    std::cout << m << "^4 = " << result << '\n';
 }

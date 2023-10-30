@@ -1,26 +1,13 @@
 /**
- * test_bigint.cpp
+ * test_big_int.cpp
  * By Sebastian Raaphorst, 2023.
  */
 
 #include <rapidcheck.h>
 #include <big_int.h>
-#include <printable.h>
-#include "gmp_gens.h"
+#include "ecc_gens.h"
 
 using namespace ecc;
-using namespace ecc::printable;
-
-namespace rc {
-    template<>
-    struct Arbitrary<BigInt> {
-        static Gen<BigInt> arbitrary() {
-            return gen::map(gen::arbitrary<gmp_mpz_t>(), [](const gmp_mpz_t& value) {
-               return BigInt{value.value};
-            });
-        }
-    };
-}
 
 int main() {
     rc::check("test extended gcd",

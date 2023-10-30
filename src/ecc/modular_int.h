@@ -33,6 +33,8 @@ namespace ecc {
         [[nodiscard]] ModularInt operator-(const ModularInt&) const;
         [[nodiscard]] ModularInt operator*(const ModularInt&) const;
         [[nodiscard]] ModularInt operator/(const ModularInt&) const;
+        [[nodiscard]] ModularInt pow(const BigInt&) const;
+        [[nodiscard]] ModularInt pow(long) const;
 
         ModularInt &operator+=(const ModularInt&);
         ModularInt &operator-=(const ModularInt&);
@@ -64,6 +66,9 @@ namespace ecc {
         // 1 if value is a residue class, i.e. there exists b such that b^2 ≡ value (mod)
         // -1 otherwise.
         [[nodiscard]] Legendre legendre() const;
+
+        // Return the square root of the number if it exists, and std::nullopt.
+        [[nodiscard]] std::optional<ModularInt> sqrt() const;
 
         // Find the multiplicative inverse of this element if it exists, which
         // is the case iff gcd(value, mod) == 1.

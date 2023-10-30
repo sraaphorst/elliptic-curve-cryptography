@@ -162,6 +162,10 @@ namespace ecc {
         return BigInt{g};
     }
 
+    int BigInt::check_bit(int pos) const noexcept {
+        return mpz_tstbit(value, pos);
+    }
+
     bool BigInt::is_probably_prime(int tries) const {
         if (tries <= 0)
             throw std::domain_error(std::format("Prime tries must be a positive integer: {}", tries));
@@ -175,7 +179,7 @@ namespace ecc {
         return str;
     }
 
-    BigInt::operator const mpz_t& () const {
+    BigInt::operator const mpz_t&() const {
         return value;
     }
 

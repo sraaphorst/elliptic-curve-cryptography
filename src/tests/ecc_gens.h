@@ -7,6 +7,7 @@
 
 #include <rapidcheck.h>
 #include <big_int.h>
+#include <modular_int.h>
 
 #include "gmp_gens.h"
 
@@ -17,6 +18,19 @@ namespace rc {
             return gen::map(gen::arbitrary<gmp_mpz_t>(), [](const gmp_mpz_t& value) {
                 return ecc::BigInt{value.value};
             });
+        }
+    };
+}
+
+namespace rc {
+    template<>
+    struct Arbitrary<ecc::ModularInt> {
+        static Gen<ecc::ModularInt> arbitrary() {
+            return gen::map(gen::arbitrary<std::tuple<ecc::BigInt, ecc::BigInt>>(),
+                    [](const auto &vals) {
+                        const auto &[value, mod] = vals;
+                        return ecc::ModularInt{value, mod};
+                    });
         }
     };
 }
