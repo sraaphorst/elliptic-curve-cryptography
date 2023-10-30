@@ -10,25 +10,33 @@
 #include <rapidcheck.h>
 #include <gmp.h>
 
+#include <gmp_ops.h>
+
 // We want to wrap an mpz_t in a struct to automatically dealloc it when it goes out of scope.
 struct gmp_mpz_t {
     mpz_t value;
 
     gmp_mpz_t() {
-        std::cout << "in default\n";
+        std::cerr << "in default\n";
         mpz_init(value);
     }
 
     gmp_mpz_t(const mpz_t& gmp) {
         mpz_init_set(value, gmp);
-        std::cout << "in const mpz_t&: " << mpz_get_str(nullptr, 10, gmp)
-                  << ", value: " << mpz_get_str(nullptr, 10, gmp) << "\n";
+        std::cerr << "in const mpz_t&: " << mpz_get_str(nullptr, 10, gmp)
+                  << ", value: " << mpz_get_str(nullptr, 10, gmp) << '\n';
     }
 
     gmp_mpz_t(const gmp_mpz_t& other) {
         mpz_init_set(value, other.value);
-        std::cout << "in const gmp_mpz_t&: " << mpz_get_str(nullptr, 10, other.value)
-                  << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+        std::cerr << "in const gmp_mpz_t&: " << mpz_get_str(nullptr, 10, other.value)
+                  << ", value: " << mpz_get_str(nullptr, 10, value) << '\n';
+    }
+
+    gmp_mpz_t(gmp_mpz_t &&other) {
+        std::cerr << "gmp_mpz_t &&: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+        ecc::gmp_ops::mpz_move(value, other.value);
+        ecc::gmp_ops::mpz_null(other.value);
     }
 
     ~gmp_mpz_t() {
@@ -36,11 +44,19 @@ struct gmp_mpz_t {
     }
 
     gmp_mpz_t& operator=(const gmp_mpz_t& other) {
-        std::cout << "in =: " << mpz_get_str(nullptr, 10, other.value)
+        std::cerr << "in =: " << mpz_get_str(nullptr, 10, other.value)
                   << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
-        mpz_set(value, other.value);
-        std::cout << "now: " << mpz_get_str(nullptr, 10, other.value)
+        if (!mpz_cmp(value, other.value))
+            mpz_set(value, other.value);
+        std::cerr << "now: " << mpz_get_str(nullptr, 10, other.value)
                   << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+        return *this;
+    }
+
+    gmp_mpz_t &operator=(gmp_mpz_t &&other) noexcept {
+        std::cerr << "in &&=: " << mpz_get_str(nullptr, 10, other.value)
+                  << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+        mpz_swap(value, other.value);
         return *this;
     }
 

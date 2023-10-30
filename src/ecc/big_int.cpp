@@ -3,10 +3,13 @@
  * By Sebastian Raaphorst, 2023.
  */
 
+#include <iostream>
 #include <format>
 #include <stdexcept>
 #include <string>
+#include <gmp.h>
 
+#include "gmp_ops.h"
 #include "big_int.h"
 
 namespace ecc {
@@ -15,27 +18,33 @@ namespace ecc {
 
     BigInt::BigInt() {
         mpz_init(value);
+        std::cerr << "BigInt default\n";
     }
 
     BigInt::BigInt(long value) {
         mpz_init_set_si(this->value, value);
+        std::cerr << "BigInt long: " << value << '\n';
     }
 
     BigInt::BigInt(const std::string& str) {
         mpz_init_set_str(value, str.c_str(), 10);
+        std::cerr << "BigInt string: " << str << '\n';
     }
 
     BigInt::BigInt(const mpz_t& value) {
         mpz_init_set(this->value, value);
+        std::cerr << "BigInt mpz_t&: " << mpz_get_str(nullptr, 10, value) << '\n';
     }
 
     BigInt::BigInt(const BigInt &other) {
         mpz_init_set(value, other.value);
+        std::cerr << "BigInt copy: " << mpz_get_str(nullptr, 10, value) << '\n';
     }
 
     BigInt::BigInt(BigInt &&other) noexcept {
-        mpz_init_set(value, other.value);
-        mpz_init(other.value);
+        gmp_ops::mpz_move(value, other.value);
+        gmp_ops::mpz_null(other.value);
+        std::cerr << "BigInt &&: " << mpz_get_str(nullptr, 10, value) << '\n';
     }
 
     BigInt::~BigInt() {
@@ -43,14 +52,17 @@ namespace ecc {
     }
 
     BigInt &BigInt::operator=(const BigInt &other) {
+        std::cout << "BigInt =: " << mpz_get_str(nullptr, 10, value)
+                  << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
         if (this != &other)
             mpz_set(this->value, other.value);
         return *this;
     }
 
     BigInt &BigInt::operator=(BigInt &&other) noexcept {
-        if (this != &other)
-            mpz_swap(value, other.value);
+        std::cout << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
+                  << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+        mpz_swap(value, other.value);
         return *this;
     }
 
