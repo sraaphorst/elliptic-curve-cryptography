@@ -9,6 +9,7 @@
 #include <rapidcheck.h>
 #include <big_int.h>
 #include <modular_int.h>
+#include <vector>
 
 #include "gmp_gens.h"
 
@@ -16,14 +17,12 @@ namespace rc {
     template<>
     struct Arbitrary<ecc::BigInt> {
         static Gen<ecc::BigInt> arbitrary() {
-            return gen::map(gen::arbitrary<gmp_mpz_t>(), [](const gmp_mpz_t& value) {
+            return gen::map<gmp_mpz_t>([](gmp_mpz_t &&value) {
                 return ecc::BigInt{value.value};
             });
         }
     };
-}
 
-namespace rc {
 //    const auto arbitraryBigIntAndProbablyPrimePair = gen::suchThat<std::pair<ecc::BigInt, ecc::BigInt>>([](const std::pair<ecc::BigInt, ecc::BigInt>& pair) {
 //        if (pair.second.is_probably_prime())
 //            std::cerr << "Found " << pair.first.to_string() << " and probably prime: " << pair.second.to_string() << '\n';
@@ -146,19 +145,42 @@ namespace rc {
 //        }
 //    };
 
+    const auto wtf = gen::suchThat<std::vector<int>>([](std::vector<int> &&v) {
+        return !v.empty() && v.size() % 7 == 0;
+    });
+
     template<>
     struct Arbitrary<ecc::ModularInt> {
         static Gen<ecc::ModularInt> arbitrary() {
-            return gen::map(gen::pair(arbitraryRandomGmp(), arbitraryPrimeGmp()),
-                                             [](const std::pair<gmp_mpz_t, gmp_mpz_t> &pair) {
-                const auto &[value, mod] = pair;
-                std::cerr << "In arbitrary ModularInt, value=" << mpz_get_str(nullptr, 10, value.value)
-                          << ", mod=" << mpz_get_str(nullptr, 10, mod.value)
-                          << ", prime=" << mpz_probab_prime_p(mod.value, 1) << '\n';
-                return ecc::ModularInt{value.value, mod.value};
+            return gen::exec([]() {
+                const auto value = *gen::arbitrary<ecc::BigInt>();
+
+                // To avoid overhead of copying extra objects, use the gmp prime generation.
+                const ecc::BigInt mod{(*arbitraryPrimeGmp()).value};
+                const auto pp = mod.is_probably_prime();
+                std::cerr << "Picked " << value.to_string() << " and " << mod.to_string() << " with " << pp << '\n';
+                return ecc::ModularInt{value, mod};
             });
         }
     };
+//    template<>
+//    struct Arbitrary<ecc::ModularInt> {
+//        static Gen<ecc::ModularInt> arbitrary() {
+//            return gen::map(gen::pair(arbitraryRandomGmp(), arbitraryPrimeGmp()),
+//                                             [](const std::pair<gmp_mpz_t, gmp_mpz_t> &pair) {
+//                const auto &[value, mod] = pair;
+//                std::cerr << "In arbitrary ModularInt, value=" << mpz_get_str(nullptr, 10, value.value)
+//                          << ", mod=" << mpz_get_str(nullptr, 10, mod.value)
+//                          << ", prime=" << mpz_probab_prime_p(mod.value, 1) << '\n';
+//                return ecc::ModularInt{value.value, mod.value};
+//            });
+//        }
+//    };
+
+
+
+
+
 //            const auto arbitraryBigInt = gen::arbitrary<ecc::BigInt>();
 //        const auto zzz = gen::pair<gmp_mpz_t, gmp_mpz_t>(arbitraryRandomGmp(), arbitraryPrimeGmp());
 //

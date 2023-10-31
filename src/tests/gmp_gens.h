@@ -117,4 +117,11 @@ namespace rc {
     };
 
     RandomState Arbitrary<gmp_mpz_t, void>::state;
+
+    const auto ProbablyPrimeGmp = gen::suchThat<gmp_mpz_t>([] (gmp_mpz_t &&g) {
+        const auto p = mpz_probab_prime_p(g.value, 1);
+        if (p)
+            std::cerr << "Found probably prime value " << mpz_get_str(nullptr, 10, g.value) << '\n';
+        return mpz_probab_prime_p(g.value, 1);
+    });
 }

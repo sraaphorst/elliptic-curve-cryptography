@@ -52,7 +52,7 @@ namespace ecc {
     }
 
     BigInt &BigInt::operator=(const BigInt &other) {
-        std::cout << "BigInt =: " << mpz_get_str(nullptr, 10, value)
+        std::cerr << "BigInt =: " << mpz_get_str(nullptr, 10, value)
                   << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
         if (*this != other)
             mpz_set(value, other.value);
@@ -60,7 +60,7 @@ namespace ecc {
     }
 
     BigInt &BigInt::operator=(BigInt &&other) noexcept {
-        std::cout << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
+        std::cerr << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
                   << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
         gmp_ops::mpz_move(value, other.value);
         gmp_ops::mpz_null(other.value);

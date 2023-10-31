@@ -21,7 +21,7 @@ namespace ecc {
         };
         static int legendre_value(Legendre) noexcept;
 
-        ModularInt(BigInt value, BigInt mod);
+        ModularInt(BigInt, BigInt);
         ModularInt(const ModularInt&) = default;
         ModularInt(ModularInt&&) noexcept = default;
 

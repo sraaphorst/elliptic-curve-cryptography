@@ -15,6 +15,7 @@ using namespace ecc::printable;
 int main() {
     rc::check("tst inverse",
               [](const ModularInt &m) {
+                    std::cerr << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime() << '\n';
                     const auto inv_opt = m.invert();
                     std::cerr << "Checking for inverse of " << m << '\n';
                     if (inv_opt.has_value()) {

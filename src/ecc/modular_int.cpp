@@ -26,10 +26,10 @@ namespace ecc {
     }
 
     // Make sure we reduce in case value >= mod.
-    ModularInt::ModularInt(BigInt value, BigInt mod): value{std::move(value)}, mod{std::move(mod)} {
-        if (this->mod.zero())
-            throw std::domain_error(std::format("Error: tried to create {}.", modular_int_string(this->value, this->mod)));
-        this->value %= this->mod;
+    ModularInt::ModularInt(BigInt _value, BigInt _mod): value{std::move(_value)}, mod{std::move(_mod)} {
+        if (mod.zero())
+            throw std::domain_error(std::format("Error: tried to create {}.", modular_int_string(value, mod)));
+        value %= mod;
     }
 
     ModularInt ModularInt::operator-() const {
@@ -103,7 +103,7 @@ namespace ecc {
     }
 
     ModularInt ModularInt::operator++(int) {
-        ModularInt tmp(*this);
+        ModularInt tmp{*this};
         value = (++value) % mod;
         return tmp;
     }
@@ -114,7 +114,7 @@ namespace ecc {
     }
 
     ModularInt ModularInt::operator--(int) {
-        ModularInt tmp(*this);
+        ModularInt tmp{*this};
         value = (--value) % mod;
         return tmp;
     }
@@ -253,9 +253,9 @@ namespace ecc {
     }
 
     void ModularInt::check_same_mod(const ModularInt &other) const {
-        if (this->mod != other.mod)
+        if (mod != other.mod)
             throw std::domain_error(std::format("Computation with incompatible mod: {} and {}.",
-                                    this->to_string(), other.to_string()));
+                                    to_string(), other.to_string()));
     }
 
     ModularInt ModularInt::op(const bigint_func1 &f) const {
@@ -264,12 +264,12 @@ namespace ecc {
 
     ModularInt ModularInt::op(const bigint_func2 &f, const ModularInt &other) const {
         check_same_mod(other);
-        return ModularInt{f(this->value, other.value), mod};
+        return ModularInt{f(value, other.value), mod};
     }
 
     ModularInt &ModularInt::op_set(const bigint_func2 &f, const ModularInt &other) {
         check_same_mod(other);
-        this->value = f(this->value, other.value);
+        value = f(value, other.value);
         return *this;
     }
 }
