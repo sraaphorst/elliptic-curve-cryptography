@@ -21,9 +21,9 @@ namespace ecc {
         std::cerr << "BigInt default\n";
     }
 
-    BigInt::BigInt(long value) {
-        mpz_init_set_si(this->value, value);
-        std::cerr << "BigInt long: " << value << '\n';
+    BigInt::BigInt(long l) {
+        mpz_init_set_si(value, l);
+        std::cerr << "BigInt long: " << l << '\n';
     }
 
     BigInt::BigInt(const std::string& str) {
@@ -31,9 +31,9 @@ namespace ecc {
         std::cerr << "BigInt string: " << str << '\n';
     }
 
-    BigInt::BigInt(const mpz_t& value) {
-        mpz_init_set(this->value, value);
-        std::cerr << "BigInt mpz_t&: " << mpz_get_str(nullptr, 10, value) << '\n';
+    BigInt::BigInt(const mpz_t& gmp) {
+        mpz_init_set(value, gmp);
+        std::cerr << "BigInt mpz_t&: " << mpz_get_str(nullptr, 10, gmp) << '\n';
     }
 
     BigInt::BigInt(const BigInt &other) {
@@ -55,7 +55,7 @@ namespace ecc {
         std::cout << "BigInt =: " << mpz_get_str(nullptr, 10, value)
                   << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
         if (*this != other)
-            mpz_set(this->value, other.value);
+            mpz_set(value, other.value);
         return *this;
     }
 
@@ -121,7 +121,7 @@ namespace ecc {
     }
 
     BigInt BigInt::operator++(int) {
-        BigInt tmp(*this);
+        BigInt tmp{*this};
         mpz_add_ui(value, value, 1);
         return tmp;
     }
@@ -132,7 +132,7 @@ namespace ecc {
     }
 
     BigInt BigInt::operator--(int) {
-        BigInt tmp(*this);
+        BigInt tmp{*this};
         mpz_sub_ui(value, value, 1);
         return tmp;
     }
@@ -146,14 +146,14 @@ namespace ecc {
     }
 
     bool BigInt::zero() const noexcept {
-        return mpz_cmp_si(this->value, 0) == 0;
+        return mpz_cmp_si(value, 0) == 0;
     }
 
     BigInt BigInt::gcd(const BigInt &other) const noexcept {
         mpz_t a, b, g;
 
         mpz_inits(a, b, g, nullptr);
-        mpz_set(a, this->value);
+        mpz_set(a, value);
         mpz_set(b, other.value);
 
         mpz_gcd(g, a, b);
@@ -166,7 +166,7 @@ namespace ecc {
         mpz_t a, b, g;
 
         mpz_inits(a, b, g, nullptr);
-        mpz_set(a, this->value);
+        mpz_set(a, value);
         mpz_set(b, other.value);
 
         mpz_gcdext(g, x.value, y.value, a, b);
@@ -203,13 +203,13 @@ namespace ecc {
 
     BigInt BigInt::op(const gmp_func1 &f) const {
         BigInt result;
-        f(result.value, this->value);
+        f(result.value, value);
         return result;
     }
 
     BigInt BigInt::op(const gmp_func2 &f, const BigInt &other) const {
         BigInt result;
-        f(result.value, this->value, other.value);
+        f(result.value, value, other.value);
         return result;
     }
 
