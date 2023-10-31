@@ -46,7 +46,7 @@ struct gmp_mpz_t {
     gmp_mpz_t& operator=(const gmp_mpz_t& other) {
         std::cerr << "in =: " << mpz_get_str(nullptr, 10, other.value)
                   << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
-        if (!mpz_cmp(value, other.value))
+        if (mpz_cmp(value, other.value))
             mpz_set(value, other.value);
         std::cerr << "now: " << mpz_get_str(nullptr, 10, other.value)
                   << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
@@ -92,11 +92,11 @@ namespace rc {
         static RandomState state;
 
         Arbitrary() {
-            std::cout << "Initializing Arbitrary<gmp_mpz_t>\n";
+            std::cerr << "Initializing Arbitrary<gmp_mpz_t>\n";
         }
 
         ~Arbitrary() {
-            std::cout << "Cleared Arbitrary<gmp_mpz_t>\n";
+            std::cerr << "Cleared Arbitrary<gmp_mpz_t>\n";
         }
 
         static Gen<gmp_mpz_t> arbitrary() {
@@ -105,12 +105,12 @@ namespace rc {
                 mpz_init(random_num);
                 mpz_urandomb(random_num, state.state, n);
 
-                std::cout << "generated random: " << mpz_get_str(nullptr, 10, random_num) << '\n';
+                std::cerr << "generated random: " << mpz_get_str(nullptr, 10, random_num) << '\n';
                 gmp_mpz_t v{random_num};
 
                 mpz_clear(random_num);
 
-                std::cout << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+                std::cerr << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
                 return v;
             });
         }

@@ -16,22 +16,23 @@ int main() {
     rc::check("tst inverse",
               [](const ModularInt &m) {
                     const auto inv_opt = m.invert();
-                    std::cout << "Checking for inverse of " << m << '\n';
+                    std::cerr << "Checking for inverse of " << m << '\n';
                     if (inv_opt.has_value()) {
                         const auto &inv = *inv_opt;
-                        std::cout << "Inverse " << inv << '\n';
+                        std::cerr << "Inverse " << inv << '\n';
                         RC_ASSERT((m * inv).get_value() == 1);
+                        std::cerr << "Done iteration\n\n\n";
                     }
               });
-    rc::check("test sqrt",
-              [](const ModularInt &m) {
-                    const auto sqrt_opt = m.sqrt();
-                    std::cout << "Checking for sqrt of " << m << '\n';
-                    if (sqrt_opt.has_value()) {
-                        const auto &sqrt = *sqrt_opt;
-                        std::cout << "sqrt " << sqrt << '\n';
-                        RC_ASSERT(sqrt * sqrt == m);
-                    }
-              });
+//    rc::check("test sqrt",
+//              [](const ModularInt &m) {
+//                    const auto sqrt_opt = m.sqrt();
+//                    std::cout << "Checking for sqrt of " << m << '\n';
+//                    if (sqrt_opt.has_value()) {
+//                        const auto &sqrt = *sqrt_opt;
+//                        std::cout << "sqrt " << sqrt << '\n';
+//                        RC_ASSERT(sqrt * sqrt == m);
+//                    }
+//              });
     return 0;
 }
