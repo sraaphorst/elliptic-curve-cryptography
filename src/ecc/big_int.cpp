@@ -3,7 +3,10 @@
  * By Sebastian Raaphorst, 2023.
  */
 
+#ifdef DEBUG
 #include <iostream>
+#endif
+
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -18,33 +21,45 @@ namespace ecc {
 
     BigInt::BigInt() {
         mpz_init(value);
-        std::cerr << "BigInt default\n";
+#ifdef DEBUG
+        std::clog << "BigInt default\n";
+#endif
     }
 
     BigInt::BigInt(long l) {
         mpz_init_set_si(value, l);
-        std::cerr << "BigInt long: " << l << '\n';
+#ifdef DEBUG
+        std::clog << "BigInt long: " << l << '\n';
+#endif
     }
 
     BigInt::BigInt(const std::string& str) {
         mpz_init_set_str(value, str.c_str(), 10);
-        std::cerr << "BigInt string: " << str << '\n';
+#ifdef DEBUG
+        std::clog << "BigInt string: " << str << '\n';
+#endif
     }
 
     BigInt::BigInt(const mpz_t& gmp) {
         mpz_init_set(value, gmp);
-        std::cerr << "BigInt mpz_t&: " << mpz_get_str(nullptr, 10, gmp) << '\n';
+#ifdef DEBUG
+        std::clog << "BigInt mpz_t&: " << mpz_get_str(nullptr, 10, gmp) << '\n';
+#endif
     }
 
     BigInt::BigInt(const BigInt &other) {
         mpz_init_set(value, other.value);
-        std::cerr << "BigInt copy: " << mpz_get_str(nullptr, 10, value) << '\n';
+#ifdef DEBUG
+        std::clog << "BigInt copy: " << mpz_get_str(nullptr, 10, value) << '\n';
+#endif
     }
 
     BigInt::BigInt(BigInt &&other) noexcept {
         gmp_ops::mpz_move(value, other.value);
         gmp_ops::mpz_null(other.value);
-        std::cerr << "BigInt &&: " << mpz_get_str(nullptr, 10, value) << '\n';
+#ifdef DEBUG
+        std::clog << "BigInt &&: " << mpz_get_str(nullptr, 10, value) << '\n';
+#endif
     }
 
     BigInt::~BigInt() {
@@ -52,16 +67,20 @@ namespace ecc {
     }
 
     BigInt &BigInt::operator=(const BigInt &other) {
-        std::cerr << "BigInt =: " << mpz_get_str(nullptr, 10, value)
+#ifdef DEBUG
+        std::clog << "BigInt =: " << mpz_get_str(nullptr, 10, value)
                   << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+#endif
         if (*this != other)
             mpz_set(value, other.value);
         return *this;
     }
 
     BigInt &BigInt::operator=(BigInt &&other) noexcept {
-        std::cerr << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
+#ifdef DEBUG
+        std::clog << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
                   << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+#endif
         gmp_ops::mpz_move(value, other.value);
         gmp_ops::mpz_null(other.value);
         return *this;

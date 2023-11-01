@@ -5,6 +5,7 @@
 
 #include "modular_int.h"
 
+#include <iostream>
 #include <format>
 #include <optional>
 #include <stdexcept>
@@ -73,11 +74,14 @@ namespace ecc {
             auto a_opt = invert();
             if (!a_opt.has_value())
                 throw std::domain_error(std::format("{} has no inverse.", a_opt->to_string()));
-            a = a_opt.value();
+            a.value = (*a_opt).value;
             n = -n;
-        }
+        } else
+            a.value = value;
 
+        std::clog << "*** " << a.value.to_string() << " ^ " << n << " (" << mod.to_string() << ")\n";
         mpz_powm_ui(a.value.value, a.value.value, n, mod.value);
+        std::clog << "*** " << a.to_string() << '\n';
         return a;
     }
 
@@ -146,6 +150,8 @@ namespace ecc {
         // To follow algorithm, set a to this.
         const auto &a = *this;
 
+        std::clog << "Legendre of " << a.to_string() << ": " << ModularInt::legendre_value(a.legendre()) << '\n';
+
         // If a non-residue class, exit immediately.
         if (a.legendre() != Legendre::RESIDUE)
             return std::nullopt;
@@ -158,37 +164,49 @@ namespace ecc {
         // a^n = a (mod n)
         // a^{n+1} = a^2 (mod n)
         // a^{(n+1)/4} = a^{1/2} (mod n), which is exactly what we want.
-        if (mod.check_bit(0) && mod.check_bit(1))
+        if (mod.check_bit(0) && mod.check_bit(1)) {
+            std::clog << "Found via Fermat\n";
             return pow((mod + 1) / 4);
+        }
 
         // Otherwise, we must use the Tonelli and Shanks method.
         // Initialize q to n - 1.
         // Find number of binary zeros on the right of the number until first 1 is found and eliminate them.
-        auto q = mod - 1;
-        const auto e = mpz_scan1(q.value, 0);
-//        mpz_tdiv_q_2exp(q.value, q.value, e);
+        std::clog << "Invoking Tonelli and Shanks\n";
+        auto q_work = mod - 1;
+        const auto e = mpz_scan1(q_work.value, 0);
+        std::clog << "q=" << q_work.to_string() << ", bin=" << mpz_get_str(nullptr, 2, q_work.value) << ", e=" << e << '\n';
+        mpz_tdiv_q_2exp(q_work.value, q_work.value, e);
+//        auto i = e;
+//        while (i) {
+//            mpz_divexact_ui(q.value, q.value, 2);
+//            --i;
+//        }
 
-        auto i = e;
-        while (i) {
-            mpz_divexact_ui(q.value, q.value, 2);
-            --i;
-        }
+        // Now make q immutable so that we can do computations with it without changing it.
+        // q.value is now const as well.
+        const auto &q = q_work;
+        std::clog << "q=" << q.to_string() << ", bin=" << mpz_get_str(nullptr, 2, q.value) << '\n';
 
         // Find a generator.
         // Randomly search for non-residue.
         ModularInt n{1, mod};
         gmp::gmp_rng rng;
+        std::clog << "Looking for generator...\n";
         while (n.legendre() != Legendre::NOT_RESIDUE)
             n = ModularInt{rng.random_mod(mod.value), mod};
+        std::clog << "Generator found, n=" << n.to_string() << ", legendre=" << ModularInt::legendre_value(n.legendre()) << '\n';
 
         // Initialize working components.
-        // y = n^q
+        // y = n^q, where q is a BigInt, so the power is calculated with with the mod of n.
         auto y = n.pow(q);
+        std::clog << "y = " << n.to_string() << '^' << q.to_string() << " = " << y.to_string() << '\n';
         auto r = e;
 
         // x = a^{{q-1}/2}
         // q-1 should be exactly divisible by 2 now.
         auto x = a.pow((q - 1) / 2);
+        std::clog << "x = " << a.to_string() << '^' << ((q-1)/2).to_string() << " = " << x.to_string() << '\n';
 
         // b = ax^2
         auto b = a * x * x;
@@ -196,32 +214,47 @@ namespace ecc {
         // x = ax
         x = a * x;
 
+        // Loop on algorithm until finished or failure. Terminate when b == 1.
         while (b.value != 1) {
-            auto t1 = b;
+            std::clog << "b=" << b.to_string() << '\n';
 
             // Continue until we either reach r or t1 becomes 1, in which case, any further exponentiation
             // does not change its value.
             auto m = 1;
+            auto t1 = b;
+            auto tmp = b;
+
+            // Find minimum m such that b^{2m} = 1 (mod p).
+            std::cerr << "m=" << m << ", r=" << r << '\n';
             while (m < r) {
                 t1 = t1.pow(2);
-//                t1 *= t1;
+
+                // This doesn't work.
+                tmp *= tmp;
+                std::clog << "t1=" << t1.to_string() << ", tmp=" << tmp.to_string() << ", equals: " << (t1 == tmp) << '\n';
                 if (t1.value == 1)
                     break;
                 ++m;
             }
 
-            // If r is m, this means this is not a quadratic residue.
-            if (r == m)
-                throw std::domain_error(std::format("Unexpected error: {} is not a quadratic residue.", to_string()));
+            // Should never happen as a is quadratic residue.
+            if (r == m) {
+                std::clog << "ERROR: " << a.to_string() << " is not a quadratic residue!\n";
+                throw std::domain_error(std::format("Unexpected error: {} is not a quadratic residue.", a.to_string()));
+            }
 
-            // Calculate y^{2^{r - m - 1}}.
+            // Calculate t = y^{2^{r - m - 1}}.
             auto t = y;
 
-            i = r - m - 1;
+            auto i = r - m - 1;
+            std::clog << "r=" << r << ", m=" << m << ", i=" << i << '\n';
             while (i) {
                 t = t.pow(2);
                 --i;
             }
+            const auto ttmp = t.pow(2 << (r - m - 1));
+            std::clog << "t=" << t.to_string() << ", ttmp=" << ttmp.to_string() << ", equals: " << (t == ttmp) << '\n';
+
 //            for (i = r - m - 1; i > 0; --i)
 //                t *= t;
 
@@ -233,9 +266,11 @@ namespace ecc {
             x = x * t;
 
             // b = by
-            b = b * y;
+            b *= y;
+            std::clog << "Now b=" << b.to_string() << '\n';
         }
 
+        std::clog << "Returning " << x.to_string() << '\n';
         return x;
     }
 
@@ -245,8 +280,11 @@ namespace ecc {
         mpz_init(result);
         const auto success = mpz_invert(result, value.value, mod.value);
 
-        if (success)
-            return ModularInt{BigInt{result}, mod};
+        if (success) {
+            ModularInt m{BigInt{result}, mod};
+            mpz_clear(result);
+            return m;
+        }
 
         mpz_clear(result);
         return std::nullopt;
@@ -269,7 +307,10 @@ namespace ecc {
 
     ModularInt &ModularInt::op_set(const bigint_func2 &f, const ModularInt &other) {
         check_same_mod(other);
-        value = f(value, other.value);
+        BigInt abc = f(value, other.value);
+        mpz_mod(abc.value, abc.value, mod.value);
+//        value = f(value, other.value);
+        value = abc;
         return *this;
     }
 }

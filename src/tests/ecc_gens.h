@@ -5,7 +5,10 @@
 
 #pragma once
 
+#ifdef DEBUG
 #include <iostream>
+#endif
+
 #include <rapidcheck.h>
 #include <big_int.h>
 #include <modular_int.h>
@@ -25,7 +28,7 @@ namespace rc {
 
 //    const auto arbitraryBigIntAndProbablyPrimePair = gen::suchThat<std::pair<ecc::BigInt, ecc::BigInt>>([](const std::pair<ecc::BigInt, ecc::BigInt>& pair) {
 //        if (pair.second.is_probably_prime())
-//            std::cerr << "Found " << pair.first.to_string() << " and probably prime: " << pair.second.to_string() << '\n';
+//            std::clog << "Found " << pair.first.to_string() << " and probably prime: " << pair.second.to_string() << '\n';
 //        return pair.second.is_probably_prime();
 //    });
 //
@@ -36,14 +39,14 @@ namespace rc {
 //                const auto &[value, mod] = pair;
 //                const auto prob_prime = mpz_probab_prime_p(mod.value, 1);
 //                if (mpz_probab_prime_p(mod.value, 1))
-//                    std::cerr << "In suchThat, value=" << mpz_get_str(nullptr, 10, value.value)
+//                    std::clog << "In suchThat, value=" << mpz_get_str(nullptr, 10, value.value)
 //                              << ", mod=" << mpz_get_str(nullptr, 10, mod.value)
 //                              << ", prime: " << prob_prime << '\n';
 //                return prob_prime;
 //            }), [](const std::pair<gmp_mpz_t, gmp_mpz_t> &pair) {
 //                const auto &[value, mod] = pair;
 //                const auto prob_prime = mpz_probab_prime_p(mod.value, 1);
-//                std::cerr << "In map, value=" << mpz_get_str(nullptr, 10, value.value)
+//                std::clog << "In map, value=" << mpz_get_str(nullptr, 10, value.value)
 //                          << ", mod=" << mpz_get_str(nullptr, 10, mod.value)
 //                          << ", prime: " << prob_prime << '\n';
 //                ecc::ModularInt mi{value.value, mod.value};
@@ -59,12 +62,12 @@ namespace rc {
                 mpz_init(random_num);
                 mpz_urandomb(random_num, Arbitrary<gmp_mpz_t>::state.state, Arbitrary<gmp_mpz_t>::n);
 
-                std::cerr << "generated random: " << mpz_get_str(nullptr, 10, random_num) << '\n';
+                std::clog << "generated random: " << mpz_get_str(nullptr, 10, random_num) << '\n';
                 gmp_mpz_t v{random_num};
 
                 mpz_clear(random_num);
 
-                std::cerr << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+                std::clog << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
                 return v;
             });
         }
@@ -78,14 +81,18 @@ namespace rc {
                 // Generate a probably prime number
                 do {
                     mpz_urandomb(random_num, Arbitrary<gmp_mpz_t>::state.state, Arbitrary<gmp_mpz_t>::n);
-                } while (!mpz_probab_prime_p(random_num, 1));
+                } while (!mpz_probab_prime_p(random_num, 25));
 
-                std::cerr << "generated prime: " << mpz_get_str(nullptr, 10, random_num) << '\n';
+#ifdef DEBUG
+                std::clog << "arbitrary prime: " << mpz_get_str(nullptr, 10, random_num) << '\n';
+#endif
                 gmp_mpz_t v{random_num};
 
                 mpz_clear(random_num);
 
-                std::cerr << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+#ifdef DEBUG
+                std::clog << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+#endif
                 return v;
             });
         }
@@ -97,12 +104,12 @@ namespace rc {
 //            mpz_init(random_num);
 //            mpz_urandomb(random_num, Arbitrary<gmp_mpz_t>::state.state, Arbitrary<gmp_mpz_t>::n);
 //
-//            std::cerr << "generated random: " << mpz_get_str(nullptr, 10, random_num) << '\n';
+//            std::clog << "generated random: " << mpz_get_str(nullptr, 10, random_num) << '\n';
 //            gmp_mpz_t v{random_num};
 //
 //            mpz_clear(random_num);
 //
-//            std::cerr << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+//            std::clog << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
 //            return v;
 //        });
 //    }
@@ -118,12 +125,12 @@ namespace rc {
 //                mpz_urandomb(random_num, Arbitrary<gmp_mpz_t>::state.state, Arbitrary<gmp_mpz_t>::n);
 //            } while (!mpz_probab_prime_p(random_num, 1));
 //
-//            std::cerr << "generated prime: " << mpz_get_str(nullptr, 10, random_num) << '\n';
+//            std::clog << "generated prime: " << mpz_get_str(nullptr, 10, random_num) << '\n';
 //            gmp_mpz_t v{random_num};
 //
 //            mpz_clear(random_num);
 //
-//            std::cerr << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+//            std::clog << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
 //            return v;
 //        });
 //    }
@@ -157,8 +164,8 @@ namespace rc {
 
                 // To avoid overhead of copying extra objects, use the gmp prime generation.
                 const ecc::BigInt mod{(*arbitraryPrimeGmp()).value};
-                const auto pp = mod.is_probably_prime();
-                std::cerr << "Picked " << value.to_string() << " and " << mod.to_string() << " with " << pp << '\n';
+                const auto pp = mod.is_probably_prime(25);
+                std::clog << "Picked " << value.to_string() << " and " << mod.to_string() << " with pp=" << pp << '\n';
                 return ecc::ModularInt{value, mod};
             });
         }
@@ -169,7 +176,7 @@ namespace rc {
 //            return gen::map(gen::pair(arbitraryRandomGmp(), arbitraryPrimeGmp()),
 //                                             [](const std::pair<gmp_mpz_t, gmp_mpz_t> &pair) {
 //                const auto &[value, mod] = pair;
-//                std::cerr << "In arbitrary ModularInt, value=" << mpz_get_str(nullptr, 10, value.value)
+//                std::clog << "In arbitrary ModularInt, value=" << mpz_get_str(nullptr, 10, value.value)
 //                          << ", mod=" << mpz_get_str(nullptr, 10, mod.value)
 //                          << ", prime=" << mpz_probab_prime_p(mod.value, 1) << '\n';
 //                return ecc::ModularInt{value.value, mod.value};
@@ -194,7 +201,7 @@ namespace rc {
 //            return gen::map(modularIntAsTuple,
 //                    [] (const auto &vals) {
 //                        const auto &[value, mod] = vals;
-//                        std::cerr << "value=" << value.to_string() << ", mod=" << mod.to_string() << '\n';
+//                        std::clog << "value=" << value.to_string() << ", mod=" << mod.to_string() << '\n';
 //                        return ecc::ModularInt{value, mod};
 //                    });
 //            return gen::map(gen::arbitrary<std::tuple<ecc::BigInt, ecc::BigInt>>(),

@@ -8,10 +8,23 @@
 #include "ecc/modular_int.h"
 #include "ecc/operations.h"
 #include "ecc/printable.h"
+#include <gmpxx.h>
 
 using namespace ecc;
 using namespace ecc::printable;
 using namespace ecc::operations;
+
+
+void power(std::string &&as, std::string &&bs, std::string &&ps) {
+    mpz_class a(as);
+    mpz_class b(bs);
+    mpz_class p(ps);
+
+    mpz_class r;
+    mpz_powm(r.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t(), p.get_mpz_t());
+
+    std::cout << "Result: " << r.get_str() << std::endl;
+}
 
 int main() {
     BigInt a(255);
@@ -90,4 +103,6 @@ int main() {
     const auto m = ModularInt{56, 129};
     const auto result = m.pow(4);
     std::cout << m << "^4 = " << result << '\n';
+
+    power("272076278251345488", "716710961654983669", "2866843846619934677");
 }
