@@ -26,7 +26,7 @@ struct gmp_mpz_t {
         mpz_init(value);
     }
 
-    gmp_mpz_t(const mpz_t& gmp) {
+    gmp_mpz_t(const mpz_t &gmp) {
         mpz_init_set(value, gmp);
 #ifdef DEBUG
         std::clog << "gmp_mpz_t const mpz_t&: " << mpz_get_str(nullptr, 10, gmp)
@@ -34,7 +34,7 @@ struct gmp_mpz_t {
 #endif
     }
 
-    gmp_mpz_t(const gmp_mpz_t& other) {
+    gmp_mpz_t(const gmp_mpz_t &other) {
         mpz_init_set(value, other.value);
 #ifdef DEBUG
         std::clog << "gmp_mpz_t const gmp_mpz_t&: " << mpz_get_str(nullptr, 10, other.value)
@@ -54,15 +54,17 @@ struct gmp_mpz_t {
         mpz_clear(value);
     }
 
-    gmp_mpz_t& operator=(const gmp_mpz_t& other) {
+    gmp_mpz_t &operator=(const gmp_mpz_t &other) {
 #ifdef DEBUG
         std::clog << "gmp_mpz_t =: " << mpz_get_str(nullptr, 10, other.value)
                   << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
 #endif
         if (mpz_cmp(value, other.value))
             mpz_set(value, other.value);
+#ifdef DEBUG
         std::clog << "now: " << mpz_get_str(nullptr, 10, other.value)
                   << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+#endif
         return *this;
     }
 

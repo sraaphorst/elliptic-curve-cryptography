@@ -79,9 +79,7 @@ namespace ecc {
         } else
             a.value = value;
 
-        std::clog << "*** " << a.value.to_string() << " ^ " << n << " (" << mod.to_string() << ")\n";
         mpz_powm_ui(a.value.value, a.value.value, n, mod.value);
-        std::clog << "*** " << a.to_string() << '\n';
         return a;
     }
 
@@ -219,7 +217,6 @@ namespace ecc {
             b *= y;
         }
 
-        std::clog << "Returning " << x.to_string() << '\n';
         return x;
     }
 
