@@ -24,6 +24,7 @@ namespace ecc {
         ModularInt(BigInt, BigInt);
         ModularInt(const ModularInt&) = default;
         ModularInt(ModularInt&&) noexcept = default;
+        ~ModularInt() = default;
 
         ModularInt &operator=(const ModularInt&) = default;
         ModularInt &operator=(ModularInt&&) noexcept = default;
@@ -66,6 +67,7 @@ namespace ecc {
         // 1 if value is a residue class, i.e. there exists b such that b^2 ≡ value (mod)
         // -1 otherwise.
         [[nodiscard]] Legendre legendre() const;
+        [[nodiscard]] bool residue() const;
 
         // Return the square root of the number if it exists, and std::nullopt.
         [[nodiscard]] std::optional<ModularInt> sqrt() const;

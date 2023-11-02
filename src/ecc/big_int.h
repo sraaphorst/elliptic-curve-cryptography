@@ -23,7 +23,6 @@ namespace ecc {
         BigInt(const mpz_t&);
         BigInt(const BigInt&);
         BigInt(BigInt&&) noexcept;
-
         ~BigInt();
 
         BigInt &operator=(const BigInt&);

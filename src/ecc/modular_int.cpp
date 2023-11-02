@@ -140,10 +140,14 @@ namespace ecc {
     ModularInt::Legendre ModularInt::legendre() const {
         // We use GMP functions here for efficiency.
         switch (mpz_legendre(value.value, mod.value)) {
-            case 0: return Legendre::DIVIDES;
+            case  1: return Legendre::RESIDUE;
             case -1: return Legendre::NOT_RESIDUE;
-            default: return Legendre::RESIDUE;
+            default: return Legendre::DIVIDES;
         }
+    }
+
+    bool ModularInt::residue() const {
+        return legendre() == Legendre::RESIDUE;
     }
 
     std::optional<ModularInt> ModularInt::sqrt() const {
