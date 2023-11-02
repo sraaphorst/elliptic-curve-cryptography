@@ -170,6 +170,11 @@ namespace rc {
             });
         }
     };
+
+    const auto residueModularInt = gen::suchThat<ecc::ModularInt>([] (const ecc::ModularInt &mi) {
+        return mi.legendre() == ecc::ModularInt::Legendre::RESIDUE;
+    });
+
 //    template<>
 //    struct Arbitrary<ecc::ModularInt> {
 //        static Gen<ecc::ModularInt> arbitrary() {

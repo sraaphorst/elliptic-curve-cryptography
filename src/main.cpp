@@ -31,7 +31,14 @@ int main() {
     BigInt b("24386246891236498216984621934812");
     BigInt c("4382957847829743892748927432");
     BigInt d = (-a * b) % c + 3;
-    std::cout << '(' << -a << " * " << b << ") % " << c << " + 3 = " << d << '\n';
+
+    mpz_class ma(255);
+    mpz_class mb("24386246891236498216984621934812");
+    mpz_class mc("4382957847829743892748927432");
+    mpz_class md = (-ma * mb) % mc + 3;
+    mpz_class mma = -ma;
+    const auto s = static_cast<mpz_class>(mma).get_str();
+    std::cout << '(' <<  mma.get_str() << " * " << mb.get_str() << ") % " << mc.get_str() << " + 3 = " << md.get_str() << '\n';
 
     // This uses == and < on BigInt to define >=.
     std::cout << b << " >= " << c << ": " << (b >= c) << '\n';

@@ -17,18 +17,23 @@ int main() {
               [](const ModularInt &m) {
                     std::clog << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime(25) << '\n';
                     const auto inv_opt = m.invert();
-                    std::clog << "Checking for inverse of " << m << '\n';
-                    if (inv_opt.has_value()) {
-                        const auto &inv = *inv_opt;
-                        std::clog << "Inverse " << inv << '\n';
-                        RC_ASSERT((m * inv).get_value() == 1);
-                        std::clog << "Done iteration\n\n\n";
-                    }
+                    RC_PRE(inv_opt.has_value());
+                    const auto &inv = *inv_opt;
+                    std::clog << "Inverse " << inv << '\n';
+                    RC_ASSERT((m * inv).get_value() == 1);
+                    std::clog << "Done iteration\n\n\n";
               });
     rc::check("test sqrt",
-              [](const ModularInt &m) {
-                    std::clog << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime() << '\n';
-                    const auto sqrt_opt = m.sqrt();
+              [](const ModularInt &mc) {
+                    // RC_PRE is broken here. If we call:
+                    // RC_PRE(m.legendre() == ModularInt::Legendre::RESIDUE);
+                    // then we get a SIGTRAP upon the first failure.
+                    ModularInt m = mc;
+                    while (m.legendre() != ModularInt::Legendre::RESIDUE)
+                        m = *rc::residueModularInt;
+                  std::clog << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime() << '\n';
+                  const auto sqrt_opt = m.sqrt();
+                    RC_PRE(sqrt_opt.has_value());
                     std::clog << "Checking for sqrt of " << m << '\n';
                     if (sqrt_opt.has_value()) {
                         const auto &sqrt = *sqrt_opt;
