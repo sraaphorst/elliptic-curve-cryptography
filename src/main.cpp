@@ -8,17 +8,37 @@
 #include "ecc/modular_int.h"
 #include "ecc/operations.h"
 #include "ecc/printable.h"
+#include <gmpxx.h>
 
 using namespace ecc;
 using namespace ecc::printable;
 using namespace ecc::operations;
+
+
+void power(std::string &&as, std::string &&bs, std::string &&ps) {
+    mpz_class a(as);
+    mpz_class b(bs);
+    mpz_class p(ps);
+
+    mpz_class r;
+    mpz_powm(r.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t(), p.get_mpz_t());
+
+    std::cout << "Result: " << r.get_str() << std::endl;
+}
 
 int main() {
     BigInt a(255);
     BigInt b("24386246891236498216984621934812");
     BigInt c("4382957847829743892748927432");
     BigInt d = (-a * b) % c + 3;
-    std::cout << '(' << -a << " * " << b << ") % " << c << " + 3 = " << d << '\n';
+
+    mpz_class ma(255);
+    mpz_class mb("24386246891236498216984621934812");
+    mpz_class mc("4382957847829743892748927432");
+    mpz_class md = (-ma * mb) % mc + 3;
+    mpz_class mma = -ma;
+    const auto s = static_cast<mpz_class>(mma).get_str();
+    std::cout << '(' <<  mma.get_str() << " * " << mb.get_str() << ") % " << mc.get_str() << " + 3 = " << md.get_str() << '\n';
 
     // This uses == and < on BigInt to define >=.
     std::cout << b << " >= " << c << ": " << (b >= c) << '\n';
@@ -74,4 +94,22 @@ int main() {
         std::cout << comp << " is (probably) prime.\n";
     else
         std::cout << comp << " is not prime.\n";
+
+    std::cout << "\n\nLEGENDRE:\n";
+    for (long i=0; i < 3; ++i) {
+        ModularInt legtest{i, 3};
+        std::cout << legtest << ": " << ModularInt::legendre_value(legtest.legendre()) << '\n';
+    }
+
+//    for (int i=2; i < 12161; ++i) {
+//        const auto m = ModularInt{i, 12161};
+//        m.sqrt();
+//        std::cout << i << '\n';
+//    }
+
+    const auto m = ModularInt{56, 129};
+    const auto result = m.pow(4);
+    std::cout << m << "^4 = " << result << '\n';
+
+    power("272076278251345488", "716710961654983669", "2866843846619934677");
 }

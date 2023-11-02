@@ -3,10 +3,16 @@
  * By Sebastian Raaphorst, 2023.
  */
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 #include <format>
 #include <stdexcept>
 #include <string>
+#include <gmp.h>
 
+#include "gmp_ops.h"
 #include "big_int.h"
 
 namespace ecc {
@@ -15,27 +21,45 @@ namespace ecc {
 
     BigInt::BigInt() {
         mpz_init(value);
+#ifdef DEBUG
+        std::clog << "BigInt default\n";
+#endif
     }
 
-    BigInt::BigInt(long value) {
-        mpz_init_set_si(this->value, value);
+    BigInt::BigInt(long l) {
+        mpz_init_set_si(value, l);
+#ifdef DEBUG
+        std::clog << "BigInt long: " << l << '\n';
+#endif
     }
 
     BigInt::BigInt(const std::string& str) {
         mpz_init_set_str(value, str.c_str(), 10);
+#ifdef DEBUG
+        std::clog << "BigInt string: " << str << '\n';
+#endif
     }
 
-    BigInt::BigInt(const mpz_t& value) {
-        mpz_init_set(this->value, value);
+    BigInt::BigInt(const mpz_t& gmp) {
+        mpz_init_set(value, gmp);
+#ifdef DEBUG
+        std::clog << "BigInt mpz_t&: " << mpz_get_str(nullptr, 10, gmp) << '\n';
+#endif
     }
 
     BigInt::BigInt(const BigInt &other) {
         mpz_init_set(value, other.value);
+#ifdef DEBUG
+        std::clog << "BigInt copy: " << mpz_get_str(nullptr, 10, value) << '\n';
+#endif
     }
 
     BigInt::BigInt(BigInt &&other) noexcept {
-        mpz_init_set(value, other.value);
-        mpz_init(other.value);
+        gmp_ops::mpz_move(value, other.value);
+        gmp_ops::mpz_null(other.value);
+#ifdef DEBUG
+        std::clog << "BigInt &&: " << mpz_get_str(nullptr, 10, value) << '\n';
+#endif
     }
 
     BigInt::~BigInt() {
@@ -43,14 +67,22 @@ namespace ecc {
     }
 
     BigInt &BigInt::operator=(const BigInt &other) {
-        if (this != &other)
-            mpz_set(this->value, other.value);
+#ifdef DEBUG
+        std::clog << "BigInt =: " << mpz_get_str(nullptr, 10, value)
+                  << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+#endif
+        if (*this != other)
+            mpz_set(value, other.value);
         return *this;
     }
 
     BigInt &BigInt::operator=(BigInt &&other) noexcept {
-        if (this != &other)
-            mpz_swap(value, other.value);
+#ifdef DEBUG
+        std::clog << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
+                  << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+#endif
+        gmp_ops::mpz_move(value, other.value);
+        gmp_ops::mpz_null(other.value);
         return *this;
     }
 
@@ -108,7 +140,7 @@ namespace ecc {
     }
 
     BigInt BigInt::operator++(int) {
-        BigInt tmp(*this);
+        BigInt tmp{*this};
         mpz_add_ui(value, value, 1);
         return tmp;
     }
@@ -119,7 +151,7 @@ namespace ecc {
     }
 
     BigInt BigInt::operator--(int) {
-        BigInt tmp(*this);
+        BigInt tmp{*this};
         mpz_sub_ui(value, value, 1);
         return tmp;
     }
@@ -133,14 +165,14 @@ namespace ecc {
     }
 
     bool BigInt::zero() const noexcept {
-        return mpz_cmp_si(this->value, 0) == 0;
+        return mpz_cmp_si(value, 0) == 0;
     }
 
     BigInt BigInt::gcd(const BigInt &other) const noexcept {
         mpz_t a, b, g;
 
         mpz_inits(a, b, g, nullptr);
-        mpz_set(a, this->value);
+        mpz_set(a, value);
         mpz_set(b, other.value);
 
         mpz_gcd(g, a, b);
@@ -153,13 +185,17 @@ namespace ecc {
         mpz_t a, b, g;
 
         mpz_inits(a, b, g, nullptr);
-        mpz_set(a, this->value);
+        mpz_set(a, value);
         mpz_set(b, other.value);
 
         mpz_gcdext(g, x.value, y.value, a, b);
 
         mpz_clears(b, a, nullptr);
         return BigInt{g};
+    }
+
+    int BigInt::check_bit(int pos) const noexcept {
+        return mpz_tstbit(value, pos);
     }
 
     bool BigInt::is_probably_prime(int tries) const {
@@ -175,7 +211,7 @@ namespace ecc {
         return str;
     }
 
-    BigInt::operator const mpz_t& () const {
+    BigInt::operator const mpz_t&() const {
         return value;
     }
 
@@ -186,13 +222,13 @@ namespace ecc {
 
     BigInt BigInt::op(const gmp_func1 &f) const {
         BigInt result;
-        f(result.value, this->value);
+        f(result.value, value);
         return result;
     }
 
     BigInt BigInt::op(const gmp_func2 &f, const BigInt &other) const {
         BigInt result;
-        f(result.value, this->value, other.value);
+        f(result.value, value, other.value);
         return result;
     }
 
@@ -201,4 +237,3 @@ namespace ecc {
         return *this;
     }
 }
-

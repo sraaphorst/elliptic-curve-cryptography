@@ -23,7 +23,6 @@ namespace ecc {
         BigInt(const mpz_t&);
         BigInt(const BigInt&);
         BigInt(BigInt&&) noexcept;
-
         ~BigInt();
 
         BigInt &operator=(const BigInt&);
@@ -66,8 +65,10 @@ namespace ecc {
         // If the function returns false, the number is guaranteed to be composite.
         [[nodiscard]] bool is_probably_prime(int tries = 1) const;
 
-        [[nodiscard]] std::string to_string() const noexcept;
+        // Check the bit at position pos. If it is 0, return 0, and if 1, return 1.
+        [[nodiscard]] int check_bit(int) const noexcept;
 
+        [[nodiscard]] std::string to_string() const noexcept;
         [[nodiscard]] explicit operator const mpz_t&() const;
 
     private:
