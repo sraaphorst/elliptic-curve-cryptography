@@ -53,8 +53,9 @@ int main() {
                   std::clog << m.to_string() << " has legendre " << ModularInt::legendre_value(m.legendre()) << '\n';
                   std::clog << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime() << '\n';
 #endif
-                  RC_ASSERT(m.sqrt().has_value());
-                  const auto sqrt = *(m.sqrt());
+                  const auto sqrt_opt = m.sqrt();
+                  RC_ASSERT(sqrt_opt.has_value());
+                  const auto &sqrt = *sqrt_opt;
 #ifdef DEBUG
                   std::clog << "sqrt " << sqrt << '\n';
 #endif
