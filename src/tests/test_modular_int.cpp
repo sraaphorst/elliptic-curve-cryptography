@@ -79,7 +79,6 @@ int main() {
     try {
         const ModularInt m1{11, 17};
         const ModularInt m2{9, 11};
-        m1.check_same_mod(m2);
         const auto m3 = m1 + m2;
     } catch (std::domain_error &ex) {
         std::clog << "Got exception: " << ex.what() << '\n';
