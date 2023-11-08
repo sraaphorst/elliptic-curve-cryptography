@@ -7,7 +7,7 @@
 
 #include <ostream>
 #include <functional>
-#include <string>
+#include <string_view>
 
 #include <gmp.h>
 
@@ -19,7 +19,7 @@ namespace ecc {
     public:
         BigInt();
         BigInt(long);
-        BigInt(const std::string&);
+        BigInt(const std::string_view&);
         BigInt(const mpz_t&);
         BigInt(const BigInt&);
         BigInt(BigInt&&) noexcept;
@@ -61,7 +61,7 @@ namespace ecc {
 
         // Determine if this number is (probably) prime.
         // Probable primality is checked the number of specified tries.
-        // If the number of tries is not a positive integer, std::bad_domain is thrown.
+        // If the number of tries is not a positive integer, std::domain_error is thrown.
         // If the function returns false, the number is guaranteed to be composite.
         [[nodiscard]] bool is_probably_prime(int tries = 1) const;
 

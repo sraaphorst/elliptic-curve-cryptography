@@ -10,6 +10,13 @@
 using namespace ecc;
 
 int main() {
+    rc::check("test string_view constructor",
+              [](const ecc::BigInt &bi) {
+        const auto s = bi.to_string();
+        const BigInt bi_s{s};
+        RC_ASSERT(bi == bi_s);
+    });
+
     rc::check("test extended gcd",
               [](const std::tuple<BigInt, BigInt> &big_ints) {
         const auto &[bi1, bi2] = big_ints;

@@ -5,9 +5,13 @@
 
 #include "modular_int.h"
 
+#ifdef DEBUG
 #include <iostream>
+#endif
 #include <format>
 #include <optional>
+#include <string>
+#include <string_view>
 #include <stdexcept>
 
 #include <gmp.h>
@@ -26,12 +30,33 @@ namespace ecc {
         return static_cast<int>(legendre);
     }
 
+    // Used by the std::string_view constructor to extract the BigInts.
+    [[nodiscard]] static std::pair<BigInt, BigInt> parse_big_ints(const std::string_view input_view) {
+        const auto openPos = input_view.find('(');
+        const auto closePos = input_view.find(')');
+
+        if (openPos == std::string_view::npos
+            || closePos == std::string_view::npos
+            || closePos != input_view.length() - 1)
+            throw std::domain_error(std::format("Not a valid ModularInt: '{}'", input_view));
+
+        BigInt value{input_view.substr(0, openPos)};
+        BigInt mod{input_view.substr(openPos + 1, closePos - openPos - 1)};
+        return {std::move(value), std::move(mod)};
+    }
+
     // Make sure we reduce in case value >= mod.
     ModularInt::ModularInt(BigInt _value, BigInt _mod): value{std::move(_value)}, mod{std::move(_mod)} {
         if (mod.zero())
-            throw std::domain_error(std::format("Error: tried to create {}.", modular_int_string(value, mod)));
+            throw std::domain_error(std::format("Error: tried to create ModularInt with mod 0: {}.",
+                                                modular_int_string(value, mod)));
         value %= mod;
     }
+
+    ModularInt::ModularInt(const std::string_view &input_view):
+        ModularInt(std::forward<std::pair<BigInt, BigInt>>(parse_big_ints(input_view))) {}
+
+    ModularInt::ModularInt(std::pair<BigInt, BigInt> &&pair): ModularInt(std::get<0>(pair), std::get<1>(pair)) {}
 
     ModularInt ModularInt::operator-() const {
         return op(negation<BigInt>);
@@ -106,7 +131,7 @@ namespace ecc {
 
     ModularInt ModularInt::operator++(int) {
         ModularInt tmp{*this};
-        value = (++value) % mod;
+        value = (value + 1) % mod;
         return tmp;
     }
 
@@ -117,7 +142,7 @@ namespace ecc {
 
     ModularInt ModularInt::operator--(int) {
         ModularInt tmp{*this};
-        value = (--value) % mod;
+        value = (value - 1) % mod;
         return tmp;
     }
 
@@ -204,7 +229,9 @@ namespace ecc {
 
             // Should never happen as a is quadratic residue.
             if (r == m) {
+#ifdef DEBUG
                 std::clog << "ERROR: " << to_string() << " is not a quadratic residue!\n";
+#endif
                 throw std::domain_error(std::format("Unexpected error: {} is not a quadratic residue.", to_string()));
             }
 

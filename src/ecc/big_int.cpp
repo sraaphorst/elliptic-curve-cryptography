@@ -12,7 +12,6 @@
 #include <string>
 #include <gmp.h>
 
-#include "gmp_ops.h"
 #include "big_int.h"
 
 namespace ecc {
@@ -33,8 +32,11 @@ namespace ecc {
 #endif
     }
 
-    BigInt::BigInt(const std::string& str) {
-        mpz_init_set_str(value, str.c_str(), 10);
+    BigInt::BigInt(const std::string_view& input_view) {
+        // We do need to ensure that the input_view is null-terminated, or we open ourselves to
+        // security vulnerabilities or undefined behaviour.
+        std::string str{input_view};
+        mpz_init_set_str(value, str.data(), 10);
 #ifdef DEBUG
         std::clog << "BigInt string: " << str << '\n';
 #endif
@@ -55,8 +57,9 @@ namespace ecc {
     }
 
     BigInt::BigInt(BigInt &&other) noexcept {
-        gmp_ops::mpz_move(value, other.value);
-        gmp_ops::mpz_null(other.value);
+        mpz_swap(value, other.value);
+        // This is needed and is the convention in mpz_class.
+        mpz_init(other.value);
 #ifdef DEBUG
         std::clog << "BigInt &&: " << mpz_get_str(nullptr, 10, value) << '\n';
 #endif
@@ -78,11 +81,10 @@ namespace ecc {
 
     BigInt &BigInt::operator=(BigInt &&other) noexcept {
 #ifdef DEBUG
-        std::clog << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
-                  << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+            std::clog << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
+                      << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
 #endif
-        gmp_ops::mpz_move(value, other.value);
-        gmp_ops::mpz_null(other.value);
+        std::swap(*value, *other.value);
         return *this;
     }
 

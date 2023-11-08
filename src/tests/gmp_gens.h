@@ -13,7 +13,6 @@
 #include <rapidcheck.h>
 #include <gmp.h>
 
-#include <gmp_ops.h>
 
 // We want to wrap an mpz_t in a struct to automatically dealloc it when it goes out of scope.
 struct gmp_mpz_t {
@@ -43,11 +42,12 @@ struct gmp_mpz_t {
     }
 
     gmp_mpz_t(gmp_mpz_t &&other) {
+        mpz_swap(value, other.value);
+        // This is needed and is the convention in mpz_class.
+        mpz_init(other.value);
 #ifdef DEBUG
         std::clog << "gmp_mpz_t &&: " << mpz_get_str(nullptr, 10, other.value) << '\n';
 #endif
-        ecc::gmp_ops::mpz_move(value, other.value);
-        ecc::gmp_ops::mpz_null(other.value);
     }
 
     ~gmp_mpz_t() {
@@ -70,10 +70,10 @@ struct gmp_mpz_t {
 
     gmp_mpz_t &operator=(gmp_mpz_t &&other) noexcept {
 #ifdef DEBUG
-        std::clog << "gmp_mpz_t &&=: " << mpz_get_str(nullptr, 10, other.value)
-                  << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+            std::clog << "gmp_mpz_t &&=: " << mpz_get_str(nullptr, 10, other.value)
+                      << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
 #endif
-        mpz_swap(value, other.value);
+        std::swap(*value, *other.value);
         return *this;
     }
 
@@ -81,8 +81,12 @@ struct gmp_mpz_t {
         return mpz_cmp(value, other.value) == 0;
     }
 
-    [[nodiscard]] bool operator!=(const gmp_mpz_t &other) const {
-        return !(*this == other);
+    [[nodiscard]] bool operator<(const gmp_mpz_t &other) const {
+        return mpz_cmp(value, other.value) < 0;
+    }
+
+    [[nodiscard]] std::string to_string() const {
+        return mpz_get_str(nullptr, 10, value);
     }
 };
 
