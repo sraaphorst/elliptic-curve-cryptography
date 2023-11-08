@@ -3,24 +3,35 @@
  * By Sebastian Raaphorst, 2023.
  */
 
+#include <iostream>
 #ifdef DEBUG
 #include <iostream>
 #include <printable.h>
 #endif
 
 #include <rapidcheck.h>
+#include <operations.h>
 #include <modular_int.h>
 #include "ecc_gens.h"
 
 
 using namespace ecc;
+using namespace ecc::operations;
 
 #ifdef DEBUG
 using namespace ecc::printable;
 #endif
 
+
 int main() {
-    rc::check("tst inverse",
+    rc::check("test string_view constructor",
+              [](const ModularInt &m) {
+        const auto s = m.to_string();
+        const ModularInt m_s{s};
+        RC_ASSERT(m == m_s);
+    });
+
+    rc::check("test inverse",
               [](const ModularInt &m) {
 #ifdef DEBUG
                   std::clog << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime(25) << '\n';
@@ -64,5 +75,16 @@ int main() {
                   std::clog << "Done iteration\n\n\n";
 #endif
               });
+
+    try {
+        const ModularInt m1{11, 17};
+        const ModularInt m2{9, 11};
+        m1.check_same_mod(m2);
+        const auto m3 = m1 + m2;
+    } catch (std::domain_error &ex) {
+        std::clog << "Got exception: " << ex.what() << '\n';
+    } catch (...) {
+        std::clog << "Caught exception.\n";
+    }
     return 0;
 }

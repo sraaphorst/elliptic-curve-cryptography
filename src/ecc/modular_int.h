@@ -8,6 +8,7 @@
 #include <functional>
 #include <optional>
 #include <ostream>
+#include <string_view>
 
 #include "big_int.h"
 
@@ -21,9 +22,11 @@ namespace ecc {
         };
         static int legendre_value(Legendre) noexcept;
 
-        ModularInt(BigInt, BigInt);
+        ModularInt() = delete;
         ModularInt(const ModularInt&) = default;
         ModularInt(ModularInt&&) noexcept = default;
+        ModularInt(BigInt, BigInt);
+        ModularInt(const std::string_view&);
         ~ModularInt() = default;
 
         ModularInt &operator=(const ModularInt&) = default;
@@ -79,6 +82,9 @@ namespace ecc {
     private:
         BigInt value;
         BigInt mod;
+
+        // Delegates to pair-extracted constructor.
+        explicit ModularInt(std::pair<BigInt, BigInt>&&);
 
         using bigint_func1 = std::function<BigInt(const BigInt&)>;
         using bigint_func2 = std::function<BigInt(const BigInt&, const BigInt&)>;
