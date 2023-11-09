@@ -15,7 +15,11 @@ using namespace ecc::printable;
 using namespace ecc::operations;
 
 void check_same_mod(const ModularInt &m1, const ModularInt &m2) {
+<<<<<<< HEAD
     if (m1.get_mod() != m2.get_mod()) {
+=======
+    if (mpz_cmp(m1.mod.value, m2.mod.value)) {
+>>>>>>> f401404 (Fixing issues and adding more tests.)
         throw std::domain_error(m1.to_string());
     }
 }
