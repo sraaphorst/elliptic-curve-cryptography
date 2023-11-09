@@ -8,8 +8,8 @@
 #ifdef DEBUG
 #include <iostream>
 #endif
-#include <format>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <stdexcept>
@@ -17,13 +17,18 @@
 #include <gmp.h>
 
 #include "operations.h"
+#include "printable.h"
 #include "gmp_rng.h"
 
 namespace ecc {
     using namespace operations;
+    using namespace printable;
+
     // The representation of a ModularInt.
     static std::string modular_int_string(const BigInt &value, const BigInt &mod) {
-        return std::format("{}({})", value.to_string(), mod.to_string());
+        std::ostringstream str;
+        str << value << '(' << mod << ')';
+        return str.str();
     }
 
     int ModularInt::legendre_value(Legendre legendre) noexcept {
@@ -37,8 +42,11 @@ namespace ecc {
 
         if (openPos == std::string_view::npos
             || closePos == std::string_view::npos
-            || closePos != input_view.length() - 1)
-            throw std::domain_error(std::format("Not a valid ModularInt: '{}'", input_view));
+            || closePos != input_view.length() - 1) {
+            std::ostringstream str;
+            str << "Not a valid ModularInt: " << input_view;
+            throw std::domain_error(str.str());
+        }
 
         BigInt value{input_view.substr(0, openPos)};
         BigInt mod{input_view.substr(openPos + 1, closePos - openPos - 1)};
@@ -47,9 +55,11 @@ namespace ecc {
 
     // Make sure we reduce in case value >= mod.
     ModularInt::ModularInt(BigInt _value, BigInt _mod): value{std::move(_value)}, mod{std::move(_mod)} {
-        if (mod.zero())
-            throw std::domain_error(std::format("Error: tried to create ModularInt with mod 0: {}.",
-                                                modular_int_string(value, mod)));
+        if (mod.zero()) {
+            std::ostringstream str;
+            str << "Tried to create ModularInt with mod 0: " << modular_int_string(value, mod);
+            throw std::domain_error(str.str());
+        }
         value %= mod;
     }
 
@@ -97,8 +107,11 @@ namespace ecc {
         // To take a^n, take {a^{-1}}^n.
         if (n < 0) {
             auto a_opt = invert();
-            if (!a_opt.has_value())
-                throw std::domain_error(std::format("{} has no inverse.", a_opt->to_string()));
+            if (!a_opt.has_value()) {
+                std::ostringstream str;
+                str << "ModularInt has no inverse: " << a;
+                throw std::domain_error(str.str());
+            }
             a.value = (*a_opt).value;
             n = -n;
         } else
@@ -157,7 +170,7 @@ namespace ecc {
     }
 
     std::string ModularInt::to_string() const noexcept {
-        return std::format("{}({})", value.to_string(), mod.to_string());
+        return modular_int_string(value, mod);
     }
 
     ModularInt::Legendre ModularInt::legendre() const {
@@ -232,7 +245,9 @@ namespace ecc {
 #ifdef DEBUG
                 std::clog << "ERROR: " << to_string() << " is not a quadratic residue!\n";
 #endif
-                throw std::domain_error(std::format("Unexpected error: {} is not a quadratic residue.", to_string()));
+                std::ostringstream str;
+                str << "Unexpected error: " << *this << " is not a quadratic residue.";
+                throw std::domain_error(str.str());
             }
 
             // Calculate t = y^{2^{r - m - 1}}.
@@ -264,9 +279,11 @@ namespace ecc {
     }
 
     void ModularInt::check_same_mod(const ModularInt &other) const {
-        if (mod != other.mod)
-            throw std::domain_error(std::format("Computation with incompatible mod: {} and {}.",
-                                    to_string(), other.to_string()));
+        if (mod != other.mod) {
+            std::ostringstream str;
+            str << "Computation attempted with incompatible ModularInts: " << *this << " and " << other << '.';
+            throw std::domain_error(str.str());
+        }
     }
 
     ModularInt ModularInt::op(const bigint_func1 &f) const {

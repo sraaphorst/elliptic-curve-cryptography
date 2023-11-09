@@ -7,7 +7,7 @@
 #include <iostream>
 #endif
 
-#include <format>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <gmp.h>
@@ -201,8 +201,11 @@ namespace ecc {
     }
 
     bool BigInt::is_probably_prime(int tries) const {
-        if (tries <= 0)
-            throw std::domain_error(std::format("Prime tries must be a positive integer: {}", tries));
+        if (tries <= 0) {
+            std::ostringstream str;
+            str << "Prime tries must be a positive integer: " << tries;
+            throw std::domain_error(str.str());
+        }
         return mpz_probab_prime_p(value, tries);
     }
 

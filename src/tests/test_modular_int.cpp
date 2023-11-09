@@ -49,20 +49,11 @@ int main() {
               });
 
     rc::check("test sqrt",
-              [](const ModularInt &mc) {
-                  // This works just fine on Ubuntu, but not on Mac OS X 14 for some reason.
-                  // It causes a SIGTRAP with exit code 133.
-#ifndef __APPLE__
-                  RC_PRE(mc.residue());
-                  ModularInt m = mc;
-#else
-                  ModularInt m = mc;
-                  while (m.legendre() != ModularInt::Legendre::RESIDUE)
-                      m = *rc::residueModularInt;
-#endif
+              [](const ModularInt &m) {
+                  RC_PRE(m.residue());
 #ifdef DEBUG
-                  std::clog << m.to_string() << " has legendre " << ModularInt::legendre_value(m.legendre()) << '\n';
-                  std::clog << "Received: " << m.to_string() << ", pp: " << m.get_mod().is_probably_prime() << '\n';
+                  std::clog << m << " has legendre " << ModularInt::legendre_value(m.legendre()) << '\n';
+                  std::clog << "Received: " << m << ", probably prime: " << m.get_mod().is_probably_prime() << '\n';
 #endif
                   const auto sqrt_opt = m.sqrt();
                   RC_ASSERT(sqrt_opt.has_value());
@@ -79,6 +70,6 @@ int main() {
     rc::check("non-compatible mod test",
               [](const ModularInt &m1, const ModularInt &m2) {
        RC_PRE(m1.get_mod() != m2.get_mod());
-       RC_ASSERT_THROWS_AS(m1 + m2, std::domain_error);
+       RC_ASSERT_THROWS_AS((void)(m1 + m2), std::domain_error);
     });
 }
