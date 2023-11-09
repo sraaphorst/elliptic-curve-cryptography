@@ -3,32 +3,33 @@
  * By Sebastian Raaphorst, 2023.
  */
 
-#include "modular_int.h"
-
 #ifdef DEBUG
 #include <iostream>
 #endif
 #include <optional>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <stdexcept>
 
+#include <fmt/core.h>
+#include <fmt/format.h>
 #include <gmp.h>
 
 #include "operations.h"
-#include "printable.h"
 #include "gmp_rng.h"
+
+#include "formatters/big_int_formatter.h"
+#include "formatters/modular_int_formatter.h"
+#include "modular_int.h"
 
 namespace ecc {
     using namespace operations;
-    using namespace printable;
+
+    static gmp::gmp_rng rng;
 
     // The representation of a ModularInt.
     static std::string modular_int_string(const BigInt &value, const BigInt &mod) {
-        std::ostringstream str;
-        str << value << '(' << mod << ')';
-        return str.str();
+        return fmt::format("{}({})", value, mod);
     }
 
     int ModularInt::legendre_value(Legendre legendre) noexcept {
@@ -42,11 +43,8 @@ namespace ecc {
 
         if (openPos == std::string_view::npos
             || closePos == std::string_view::npos
-            || closePos != input_view.length() - 1) {
-            std::ostringstream str;
-            str << "Not a valid ModularInt: " << input_view;
-            throw std::domain_error(str.str());
-        }
+            || closePos != input_view.length() - 1)
+            throw std::domain_error(fmt::format("Not a valid ModularInt: {}", input_view));
 
         BigInt value{input_view.substr(0, openPos)};
         BigInt mod{input_view.substr(openPos + 1, closePos - openPos - 1)};
@@ -55,11 +53,9 @@ namespace ecc {
 
     // Make sure we reduce in case value >= mod.
     ModularInt::ModularInt(BigInt _value, BigInt _mod): value{std::move(_value)}, mod{std::move(_mod)} {
-        if (mod.zero()) {
-            std::ostringstream str;
-            str << "Tried to create ModularInt with mod 0: " << modular_int_string(value, mod);
-            throw std::domain_error(str.str());
-        }
+        if (mod.zero())
+            throw std::domain_error(fmt::format("Tried to create a ModularInt with mod 0: {}",
+                                                modular_int_string(value, mod)));
         value %= mod;
     }
 
@@ -107,11 +103,8 @@ namespace ecc {
         // To take a^n, take {a^{-1}}^n.
         if (n < 0) {
             auto a_opt = invert();
-            if (!a_opt.has_value()) {
-                std::ostringstream str;
-                str << "ModularInt has no inverse: " << a;
-                throw std::domain_error(str.str());
-            }
+            if (!a_opt.has_value())
+                throw std::domain_error(fmt::format("ModularInt has no inverse: {}", a));
             a.value = (*a_opt).value;
             n = -n;
         } else
@@ -212,8 +205,6 @@ namespace ecc {
         // Find a generator.
         // Randomly search for non-residue.
         ModularInt n{1, mod};
-        // TODO: Make this static?
-        gmp::gmp_rng rng;
         while (n.legendre() != Legendre::NOT_RESIDUE)
             n = ModularInt{rng.random_mod(mod.value), mod};
 
@@ -245,9 +236,7 @@ namespace ecc {
 #ifdef DEBUG
                 std::clog << "ERROR: " << to_string() << " is not a quadratic residue!\n";
 #endif
-                std::ostringstream str;
-                str << "Unexpected error: " << *this << " is not a quadratic residue.";
-                throw std::domain_error(str.str());
+                throw std::domain_error(fmt::format("Unexpected error: {} is not a quadratic residue.", *this));
             }
 
             // Calculate t = y^{2^{r - m - 1}}.
@@ -280,9 +269,8 @@ namespace ecc {
 
     void ModularInt::check_same_mod(const ModularInt &other) const {
         if (mod != other.mod) {
-            std::ostringstream str;
-            str << "Computation attempted with incompatible ModularInts: " << *this << " and " << other << '.';
-            throw std::domain_error(str.str());
+            throw std::domain_error(fmt::format("Computation attempted with incompatible ModularInts: {} and {}.",
+                                                *this, other));
         }
     }
 

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <ostream>
 #include <functional>
 #include <string_view>
 
