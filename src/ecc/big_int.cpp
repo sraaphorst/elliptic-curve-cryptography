@@ -10,8 +10,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <fmt/core.h>
+#include <fmt/format.h>
 #include <gmp.h>
 
+#include "formatters/big_int_formatter.h"
 #include "big_int.h"
 
 namespace ecc {

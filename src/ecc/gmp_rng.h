@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <gmp.h>
 
 #include "big_int.h"
@@ -17,19 +16,10 @@ namespace ecc::gmp {
         gmp_randstate_t state;
 
     public:
-        gmp_rng() {
-            const auto time = std::chrono::high_resolution_clock::now();
-            const auto duration = time.time_since_epoch();
-            const auto seed = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+        gmp_rng() noexcept;
+        ~gmp_rng() noexcept;
 
-            gmp_randinit_mt(state);
-            gmp_randseed_ui(state, seed);
-        }
-
-        BigInt random_mod(const BigInt&);
-
-        ~gmp_rng() {
-            gmp_randclear(state);
-        }
+        // Generate a BigInt in [0,mod), where mod is the parameter.
+        BigInt random_mod(const BigInt&) noexcept;
     };
 }
