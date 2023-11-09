@@ -16,7 +16,8 @@ using namespace ecc::operations;
 
 void check_same_mod(const ModularInt &m1, const ModularInt &m2) {
     if (m1.get_mod() != m2.get_mod()) {
-        throw std::domain_error(m1.to_string());
+//        throw std::domain_error(m1.to_string());
+        throw std::domain_error("Argh");
     }
 }
 
