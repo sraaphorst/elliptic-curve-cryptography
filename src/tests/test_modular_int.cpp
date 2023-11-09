@@ -67,16 +67,6 @@ int main() {
 #endif
               });
 
-    try {
-        ModularInt m1{1, 3};
-        ModularInt m2{4, 5};
-        auto i = m1 + m2;
-    } catch (std::domain_error &ex) {
-        std::clog << "Domain error: " << ex.what() << '\n';
-    } catch (...) {
-        std::clog << "Another error.\n";
-    }
-
     rc::check("non-compatible mod test",
               [](const ModularInt &m1, const ModularInt &m2) {
        RC_PRE(m1.get_mod() != m2.get_mod());
