@@ -19,7 +19,7 @@ namespace ecc::gmp {
         gmp_rng() noexcept;
         ~gmp_rng() noexcept;
 
-        // Generate a BigInt in [0,mod), where mod is the parameter.
+        // Generate a BigInt in [0,_mod), where _mod is the parameter.
         BigInt random_mod(const BigInt&) noexcept;
     };
 }

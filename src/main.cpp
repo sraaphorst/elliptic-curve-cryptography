@@ -63,7 +63,7 @@ int main() {
 //    std::cout << gcd2 << " = " << x1 << " * " << g1 << " + " << x2 << " * " << g2 << " -> " << (x1 * g1 + x2 * g2) << "\n\n";
 //
 //
-//    // Let's do a test mod 7.
+//    // Let's do a test _mod 7.
 //    constexpr const auto n = 7;
 //    for (long i=0; i < n; ++i) {
 //        const ModularInt mi(i, 7);
@@ -84,7 +84,7 @@ int main() {
 //    const ModularInt inv{BigInt{"732874823"}, BigInt{"32918938193048321"}};
 //    const auto inv_calc = inv.invert();
 //    if (inv_calc.has_value())
-//        std::cout << "The inverse of " << inv << " is " << inv_calc.value() << ": " << (inv * inv_calc.value()) << "\n";
+//        std::cout << "The inverse of " << inv << " is " << inv_calc._value() << ": " << (inv * inv_calc._value()) << "\n";
 //    else
 //        std::cout << "ERROR: " << inv << " was determined to have no inverse.\n";
 //

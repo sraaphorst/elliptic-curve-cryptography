@@ -29,15 +29,15 @@ struct gmp_mpz_t {
         mpz_init_set(value, gmp);
 #ifdef DEBUG
         std::clog << "gmp_mpz_t const mpz_t&: " << mpz_get_str(nullptr, 10, gmp)
-                  << ", value: " << mpz_get_str(nullptr, 10, gmp) << '\n';
+                  << ", _value: " << mpz_get_str(nullptr, 10, gmp) << '\n';
 #endif
     }
 
     gmp_mpz_t(const gmp_mpz_t &other) {
         mpz_init_set(value, other.value);
 #ifdef DEBUG
-        std::clog << "gmp_mpz_t const gmp_mpz_t&: " << mpz_get_str(nullptr, 10, other.value)
-                  << ", value: " << mpz_get_str(nullptr, 10, value) << '\n';
+        std::clog << "gmp_mpz_t const gmp_mpz_t&: " << mpz_get_str(nullptr, 10, other._value)
+                  << ", _value: " << mpz_get_str(nullptr, 10, _value) << '\n';
 #endif
     }
 
@@ -46,7 +46,7 @@ struct gmp_mpz_t {
         // This is needed and is the convention in mpz_class.
         mpz_init(other.value);
 #ifdef DEBUG
-        std::clog << "gmp_mpz_t &&: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+        std::clog << "gmp_mpz_t &&: " << mpz_get_str(nullptr, 10, other._value) << '\n';
 #endif
     }
 
@@ -56,22 +56,22 @@ struct gmp_mpz_t {
 
     gmp_mpz_t &operator=(const gmp_mpz_t &other) {
 #ifdef DEBUG
-        std::clog << "gmp_mpz_t =: " << mpz_get_str(nullptr, 10, other.value)
-                  << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+        std::clog << "gmp_mpz_t =: " << mpz_get_str(nullptr, 10, other._value)
+                  << ", _value: " << mpz_get_str(nullptr, 10, _value) << "\n";
 #endif
         if (mpz_cmp(value, other.value))
             mpz_set(value, other.value);
 #ifdef DEBUG
-        std::clog << "now: " << mpz_get_str(nullptr, 10, other.value)
-                  << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+        std::clog << "now: " << mpz_get_str(nullptr, 10, other._value)
+                  << ", _value: " << mpz_get_str(nullptr, 10, _value) << "\n";
 #endif
         return *this;
     }
 
     gmp_mpz_t &operator=(gmp_mpz_t &&other) noexcept {
 #ifdef DEBUG
-            std::clog << "gmp_mpz_t &&=: " << mpz_get_str(nullptr, 10, other.value)
-                      << ", value: " << mpz_get_str(nullptr, 10, value) << "\n";
+            std::clog << "gmp_mpz_t &&=: " << mpz_get_str(nullptr, 10, other._value)
+                      << ", _value: " << mpz_get_str(nullptr, 10, _value) << "\n";
 #endif
         std::swap(*value, *other.value);
         return *this;
@@ -137,7 +137,7 @@ namespace rc {
                 mpz_clear(random_num);
 
 #ifdef DEBUG
-                std::clog << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+                std::clog << "_value now " << mpz_get_str(nullptr, 10, v._value) << '\n';
 #endif
                 return v;
             });

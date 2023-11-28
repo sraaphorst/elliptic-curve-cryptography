@@ -51,12 +51,12 @@ namespace ecc {
         return {std::move(value), std::move(mod)};
     }
 
-    // Make sure we reduce in case value >= mod.
-    ModularInt::ModularInt(BigInt _value, BigInt _mod): value{std::move(_value)}, mod{std::move(_mod)} {
-        if (mod.zero())
-            throw std::domain_error(fmt::format("Tried to create a ModularInt with mod 0: {}",
-                                                modular_int_string(value, mod)));
-        value %= mod;
+    // Make sure we reduce in case _value >= _mod.
+    ModularInt::ModularInt(BigInt _value, BigInt _mod): _value{std::move(_value)}, _mod{std::move(_mod)} {
+        if (_mod.zero())
+            throw std::domain_error(fmt::format("Tried to create a ModularInt with _mod 0: {}",
+                                                modular_int_string(_value, _mod)));
+        _value %= _mod;
     }
 
     ModularInt::ModularInt(const std::string_view &input_view):
@@ -86,17 +86,17 @@ namespace ecc {
 
     ModularInt ModularInt::pow(const BigInt &n) const {
         mpz_t pvalue;
-        mpz_init_set(pvalue, value.value);
-        mpz_powm(pvalue, pvalue, n.value, mod.value);
-        ModularInt result{pvalue, mod};
+        mpz_init_set(pvalue, _value.value);
+        mpz_powm(pvalue, pvalue, n.value, _mod.value);
+        ModularInt result{pvalue, _mod};
         mpz_clear(pvalue);
         return result;
     }
 
    ModularInt ModularInt::pow(long n) const {
-        ModularInt a{1, mod};
+        ModularInt a{1, _mod};
 
-        // Power 0 obviously gives 1 (mod m).
+        // Power 0 obviously gives 1 (_mod m).
         if (n == 0L)
             return a;
 
@@ -105,12 +105,12 @@ namespace ecc {
             auto a_opt = invert();
             if (!a_opt.has_value())
                 throw std::domain_error(fmt::format("ModularInt has no inverse: {}", a));
-            a.value = (*a_opt).value;
+            a._value = (*a_opt)._value;
             n = -n;
         } else
-            a.value = value;
+            a._value = _value;
 
-        mpz_powm_ui(a.value.value, a.value.value, n, mod.value);
+        mpz_powm_ui(a._value.value, a._value.value, n, _mod.value);
         return a;
     }
 
@@ -131,44 +131,44 @@ namespace ecc {
     }
 
     ModularInt &ModularInt::operator++() {
-        value = (++value) % mod;
+        _value = (++_value) % _mod;
         return *this;
     }
 
     ModularInt ModularInt::operator++(int) {
         ModularInt tmp{*this};
-        value = (value + 1) % mod;
+        _value = (_value + 1) % _mod;
         return tmp;
     }
 
     ModularInt &ModularInt::operator--() {
-        value = (--value) % mod;
+        _value = (--_value) % _mod;
         return *this;
     }
 
     ModularInt ModularInt::operator--(int) {
         ModularInt tmp{*this};
-        value = (value - 1) % mod;
+        _value = (_value - 1) % _mod;
         return tmp;
     }
 
     bool ModularInt::operator==(const ModularInt &other) const {
         check_same_mod(other);
-        return value == other.value;
+        return _value == other._value;
     }
 
     bool ModularInt::operator<(const ModularInt &other) const {
         check_same_mod(other);
-        return value < other.value;
+        return _value < other._value;
     }
 
     std::string ModularInt::to_string() const noexcept {
-        return modular_int_string(value, mod);
+        return modular_int_string(_value, _mod);
     }
 
     ModularInt::Legendre ModularInt::legendre() const {
         // We use GMP functions here for efficiency.
-        switch (mpz_legendre(value.value, mod.value)) {
+        switch (mpz_legendre(_value.value, _mod.value)) {
             case  1: return Legendre::RESIDUE;
             case -1: return Legendre::NOT_RESIDUE;
             default: return Legendre::DIVIDES;
@@ -186,30 +186,30 @@ namespace ecc {
 
         // Test the last two bits of the modulus.
         // If they are both 1, then we can use Fermat's Little Theorem to calculate the result:
-        // x = a^{(n+1)/4} (mod n)
+        // x = a^{(n+1)/4} (_mod n)
         // n+1 converts the last two bits from 1 to 0, and thus 4 divides n+1.
         // By Fermat:
-        // a^n = a (mod n)
-        // a^{n+1} = a^2 (mod n)
-        // a^{(n+1)/4} = a^{1/2} (mod n), which is exactly what we want.
-        if (mod.check_bit(0) && mod.check_bit(1))
-            return pow((mod + 1) / 4);
+        // a^n = a (_mod n)
+        // a^{n+1} = a^2 (_mod n)
+        // a^{(n+1)/4} = a^{1/2} (_mod n), which is exactly what we want.
+        if (_mod.check_bit(0) && _mod.check_bit(1))
+            return pow((_mod + 1) / 4);
 
         // Otherwise, we must use the Tonelli and Shanks method.
         // Initialize q to n - 1 (even), find # of zeros on right in binary representation, and eliminate them.
         // std::clog << "Invoking Tonelli and Shanks\n";
-        auto q = mod - 1;
+        auto q = _mod - 1;
         const auto e = mpz_scan1(q.value, 0);
         mpz_tdiv_q_2exp(q.value, q.value, e);
 
         // Find a generator.
         // Randomly search for non-residue.
-        ModularInt n{1, mod};
+        ModularInt n{1, _mod};
         while (n.legendre() != Legendre::NOT_RESIDUE)
-            n = ModularInt{rng.random_mod(mod.value), mod};
+            n = ModularInt{rng.random_mod(_mod.value), _mod};
 
         // Initialize working components.
-        // y = n^q, where q is a BigInt, so the power is calculated with with the mod of n.
+        // y = n^q, where q is a BigInt, so the power is calculated with with the _mod of n.
         auto y = n.pow(q);
         auto r = e;
 
@@ -220,13 +220,13 @@ namespace ecc {
         x = (*this) * x;
 
         // Loop on algorithm until finished or failure. Terminate when b == 1.
-        while (b.value != 1) {
-            // Find minimum m such that b^{2m} = 1 (mod p).
+        while (b._value != 1) {
+            // Find minimum m such that b^{2m} = 1 (_mod p).
             auto m = 1;
             auto t1 = b;
             while (m < r) {
                 t1 *= t1;
-                if (t1.value == 1)
+                if (t1._value == 1)
                     break;
                 ++m;
             }
@@ -255,10 +255,10 @@ namespace ecc {
         // We use GMP functions here for efficiency.
         mpz_t result;
         mpz_init(result);
-        const auto success = mpz_invert(result, value.value, mod.value);
+        const auto success = mpz_invert(result, _value.value, _mod.value);
 
         if (success) {
-            ModularInt m{BigInt{result}, mod};
+            ModularInt m{BigInt{result}, _mod};
             mpz_clear(result);
             return m;
         }
@@ -268,24 +268,24 @@ namespace ecc {
     }
 
     void ModularInt::check_same_mod(const ModularInt &other) const {
-        if (mod != other.mod) {
+        if (_mod != other._mod) {
             throw std::domain_error(fmt::format("Computation attempted with incompatible ModularInts: {} and {}.",
                                                 *this, other));
         }
     }
 
     ModularInt ModularInt::op(const bigint_func1 &f) const {
-        return ModularInt{f(value), mod};
+        return ModularInt{f(_value), _mod};
     }
 
     ModularInt ModularInt::op(const bigint_func2 &f, const ModularInt &other) const {
         check_same_mod(other);
-        return ModularInt{f(value, other.value), mod};
+        return ModularInt{f(_value, other._value), _mod};
     }
 
     ModularInt &ModularInt::op_set(const bigint_func2 &f, const ModularInt &other) {
         check_same_mod(other);
-        value = f(value, other.value) % mod;
+        _value = f(_value, other._value) % _mod;
         return *this;
     }
 }

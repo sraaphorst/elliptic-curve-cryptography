@@ -56,7 +56,7 @@ namespace ecc {
     BigInt::BigInt(const BigInt &other) {
         mpz_init_set(value, other.value);
 #ifdef DEBUG
-        std::clog << "BigInt copy: " << mpz_get_str(nullptr, 10, value) << '\n';
+        std::clog << "BigInt copy: " << mpz_get_str(nullptr, 10, _value) << '\n';
 #endif
     }
 
@@ -65,7 +65,7 @@ namespace ecc {
         // This is needed and is the convention in mpz_class.
         mpz_init(other.value);
 #ifdef DEBUG
-        std::clog << "BigInt &&: " << mpz_get_str(nullptr, 10, value) << '\n';
+        std::clog << "BigInt &&: " << mpz_get_str(nullptr, 10, _value) << '\n';
 #endif
     }
 
@@ -75,8 +75,8 @@ namespace ecc {
 
     BigInt &BigInt::operator=(const BigInt &other) {
 #ifdef DEBUG
-        std::clog << "BigInt =: " << mpz_get_str(nullptr, 10, value)
-                  << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+        std::clog << "BigInt =: " << mpz_get_str(nullptr, 10, _value)
+                  << ", other: " << mpz_get_str(nullptr, 10, other._value) << '\n';
 #endif
         if (*this != other)
             mpz_set(value, other.value);
@@ -85,8 +85,8 @@ namespace ecc {
 
     BigInt &BigInt::operator=(BigInt &&other) noexcept {
 #ifdef DEBUG
-            std::clog << "BigInt &&=: " << mpz_get_str(nullptr, 10, value)
-                      << ", other: " << mpz_get_str(nullptr, 10, other.value) << '\n';
+            std::clog << "BigInt &&=: " << mpz_get_str(nullptr, 10, _value)
+                      << ", other: " << mpz_get_str(nullptr, 10, other._value) << '\n';
 #endif
         std::swap(*value, *other.value);
         return *this;
