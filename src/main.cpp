@@ -119,17 +119,25 @@ int main() {
 //
 //    power("272076278251345488", "716710961654983669", "2866843846619934677");
 
-    try {
-        BigInt b1v{1};
-        BigInt b1m{3};
-        BigInt b2v{1};
-        BigInt b2m{5};
-        ModularInt mi1{b1v, b1m};
-        ModularInt mi2{b2v, b2m};
-        check_same_mod(mi1, mi2);
-    } catch (std::domain_error &ex) {
-        std::cout << "Domain error: " << ex.what() << '\n';
-    } catch (...) {
-        std::cout << "Other weirdness.\n";
-    }
+    BigInt v1{"410468015445649"};
+    BigInt m1{"755255173926857"};
+    ModularInt mi{v1, m1};
+    const auto sq = mi.sqrt();
+    if (sq.has_value())
+        std::cout << "sqrt is: " << *sq << '\n';
+    else
+        std::cout << "no value\n";
+//    try {
+//        BigInt b1v{1};
+//        BigInt b1m{3};
+//        BigInt b2v{1};
+//        BigInt b2m{5};
+//        ModularInt mi1{b1v, b1m};
+//        ModularInt mi2{b2v, b2m};
+//        check_same_mod(mi1, mi2);
+//    } catch (std::domain_error &ex) {
+//        std::cout << "Domain error: " << ex.what() << '\n';
+//    } catch (...) {
+//        std::cout << "Other weirdness.\n";
+//    }
 }

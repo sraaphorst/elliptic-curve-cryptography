@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <stdexcept>
+#include <utility>
 
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -52,7 +53,7 @@ namespace ecc {
     }
 
     // Make sure we reduce in case _value >= _mod.
-    ModularInt::ModularInt(BigInt _value, BigInt _mod): _value{std::move(_value)}, _mod{std::move(_mod)} {
+    ModularInt::ModularInt(BigInt value, BigInt mod): _value{std::move(value)}, _mod{std::move(mod)} {
         if (_mod.zero())
             throw std::domain_error(fmt::format("Tried to create a ModularInt with _mod 0: {}",
                                                 modular_int_string(_value, _mod)));
@@ -240,7 +241,9 @@ namespace ecc {
             }
 
             // Calculate t = y^{2^{r - m - 1}}.
-            const auto t = y.pow(1 << (r - m - 1));
+            const auto shift_by = r - m - 1;
+            const auto shift = 1 << shift_by;
+            const auto t = y.pow(shift);
 
             y = t * t;
             r = m;

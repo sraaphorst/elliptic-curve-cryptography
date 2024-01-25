@@ -9,7 +9,7 @@
 #include "point.h"
 
 namespace ecc {
-    Point::Point(ecc::ModularInt x, ecc::ModularInt y): x{std::move(x)}, y{std::move(y)} {
+    Point::Point(ecc::ModularInt x, ecc::ModularInt y): _x{std::move(x)}, _y{std::move(y)} {
 
     }
 

@@ -12,11 +12,8 @@
 
 template <>
 struct fmt::formatter<ecc::ModularInt> {
-    // You can store parsed arguments here if necessary
-
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
-        // Implement parsing logic here if needed, e.g., handling different formats
         return ctx.begin();
     }
 
