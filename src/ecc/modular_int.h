@@ -55,18 +55,18 @@ namespace ecc {
         [[nodiscard]] bool operator<(const ModularInt&) const;
 
         [[nodiscard]] inline const BigInt &get_value() const {
-            return value;
+            return _value;
         }
 
         [[nodiscard]] inline const BigInt &get_mod() const {
-            return mod;
+            return _mod;
         }
 
         [[nodiscard]] std::string to_string() const noexcept;
 
-        // Find the Legendre value of (value/mod), which is:
-        // 0 if mod | value
-        // 1 if value is a residue class, i.e. there exists b such that b^2 ≡ value (mod)
+        // Find the Legendre _value of (_value/_mod), which is:
+        // 0 if _mod | _value
+        // 1 if _value is a residue class, i.e. there exists b such that b^2 ≡ _value (_mod)
         // -1 otherwise.
         [[nodiscard]] Legendre legendre() const;
         [[nodiscard]] bool residue() const;
@@ -75,12 +75,19 @@ namespace ecc {
         [[nodiscard]] std::optional<ModularInt> sqrt() const;
 
         // Find the multiplicative inverse of this element if it exists, which
-        // is the case iff gcd(value, mod) == 1.
+        // is the case iff gcd(_value, _mod) == 1.
         [[nodiscard]] std::optional<ModularInt> invert() const;
 
+        [[nodiscard]] const inline BigInt &value() const noexcept {
+            return _value;
+        }
+        [[nodiscard]] const inline BigInt &mod() const noexcept {
+            return _mod;
+        }
+
     private:
-        BigInt value;
-        BigInt mod;
+        BigInt _value;
+        BigInt _mod;
 
         // Delegates to pair-extracted constructor.
         explicit ModularInt(std::pair<BigInt, BigInt>&&);
@@ -88,7 +95,7 @@ namespace ecc {
         using bigint_func1 = std::function<BigInt(const BigInt&)>;
         using bigint_func2 = std::function<BigInt(const BigInt&, const BigInt&)>;
 
-        // Check to see if the mod values are the same: if not, throw a domain_exception.
+        // Check to see if the _mod values are the same: if not, throw a domain_exception.
         void check_same_mod(const ModularInt&) const;
 
         [[nodiscard]] ModularInt op(const bigint_func1&) const;

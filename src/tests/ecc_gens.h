@@ -45,7 +45,7 @@ namespace rc {
             mpz_clear(random_num);
 
 #ifdef DEBUG
-            std::clog << "value now " << mpz_get_str(nullptr, 10, v.value) << '\n';
+            std::clog << "_value now " << mpz_get_str(nullptr, 10, v._value) << '\n';
 #endif
             return v;
         });
@@ -60,8 +60,8 @@ namespace rc {
                 // To avoid overhead of copying extra objects, use the gmp prime generation.
                 const ecc::BigInt mod{(*arbitraryPrimeGmp()).value};
 #ifdef DEBUG
-                const auto pp = mod.is_probably_prime(25);
-                std::clog << "Picked " << value.to_string() << " and " << mod.to_string() << " with pp=" << pp << '\n';
+                const auto pp = _mod.is_probably_prime(25);
+                std::clog << "Picked " << _value.to_string() << " and " << _mod.to_string() << " with pp=" << pp << '\n';
 #endif
                 return ecc::ModularInt{value, mod};
             });

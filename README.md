@@ -8,4 +8,8 @@ Adding a submodule:
 From https://github.com/WojciechMigda/rapidcheck-csv
 
 $ git submodule add https://github.com/emil-e/rapidcheck src/tests/rapidcheck
+
+To update:
+$ git submodule init
+$ git submodule update
 -->

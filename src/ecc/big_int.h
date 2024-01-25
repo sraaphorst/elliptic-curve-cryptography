@@ -76,7 +76,7 @@ namespace ecc {
         using gmp_func1 = std::function<void(mpz_ptr, mpz_srcptr)>;
         using gmp_func2 = std::function<void(mpz_ptr, mpz_srcptr, mpz_srcptr)>;
 
-        // Raises a domain_error if this is zero for div and mod operations.
+        // Raises a domain_error if this is zero for div and _mod operations.
         void check(const std::string&) const;
 
         [[nodiscard]] BigInt op(const gmp_func1&) const;

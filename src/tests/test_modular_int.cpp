@@ -67,7 +67,7 @@ int main() {
 #endif
               });
 
-    rc::check("non-compatible mod test",
+    rc::check("non-compatible _mod test",
               [](const ModularInt &m1, const ModularInt &m2) {
        RC_PRE(m1.get_mod() != m2.get_mod());
        RC_ASSERT_THROWS_AS((void)(m1 + m2), std::domain_error);
